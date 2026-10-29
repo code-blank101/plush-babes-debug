@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<title>PLUSH BABES — My Account</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; background: #FAFAFA; padding-top: 68px; margin:0; }
+  .font-tagline { font-family: 'Indie Flower', cursive; }
+  #siteHeader { background: #FF8EBA; position: fixed !important; top:0; left:0; right:0; width:100%; z-index:50; }
+  #siteHeader.is-scrolled { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .icon-btn { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; color: white; transition: background 150ms ease, transform 100ms ease; }
+  .icon-btn:hover { background: rgba(255,255,255,0.15); }
+  .icon-btn:active { transform: scale(0.92); }
+  #suggestDropdown { display: none; box-shadow: 0 16px 40px rgba(0,0,0,0.15); max-height: 70vh; overflow-y: auto; }
+  #suggestDropdown.is-open { display: block !important; }
+  #mobileSuggestDropdown { display: none; box-shadow: 0 16px 40px rgba(0,0,0,0.12); max-height: 80vh; overflow-y: auto; }
+  #mobileSuggestDropdown.is-open { display: block !important; }
+  #mobileHeaderSearch { display: none; }
+  #mobileHeaderSearch.is-open { display: flex !important; }
+  #headerMainRow.is-hidden { opacity: 0; pointer-events: none; }
+  #menuDropdown { display: none; width: 200px; background: white; color: black; border-radius: 14px; box-shadow: 0 16px 40px rgba(0,0,0,0.18); border: 1px solid rgba(0,0,0,0.06); overflow: hidden; }
+  #menuDropdown.is-open { display: block; }
+  .menu-item { display: block; width: 100%; text-align: left; padding: 10px 14px; font-size: 13px; font-weight: 500; color: black; transition: background 120ms ease; }
+  .menu-item:hover { background: #FFF0F6; }
+  .menu-divider { border-top: 1px solid rgba(0,0,0,0.08); margin: 4px 0; }
+  .suggest-item:hover { background: #FFF0F6; }
+  .acct-nav-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 13px 20px; font-size: 13.5px; font-weight: 500; color: #333; transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease; }
+  .acct-nav-item svg { flex-shrink: 0; }
+  .acct-nav-item:hover { background: #FAFAFA; }
+  .acct-nav-item.is-active { background: #FAFAFA; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.06); color: #2563EB; font-weight: 700; }
+  .acct-nav-divider { border-top: 1px solid #eee; margin: 6px 0; }
+  .acct-nav-secondary { font-size: 13px; padding: 11px 20px; color: #555; }
+  .acct-nav-secondary:hover { background: #FAFAFA; }
+  @media (max-width: 767px) {
+    #acctNav { display: flex; overflow-x: auto; white-space: nowrap; padding: 6px; -ms-overflow-style: none; scrollbar-width: none; }
+    #acctNav::-webkit-scrollbar { display: none; }
+    .acct-nav-item { flex-direction: column; align-items: center; gap: 4px; width: auto; padding: 10px 14px; font-size: 10.5px; border-radius: 12px; text-align: center; }
+    .acct-nav-item.is-active { box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
+    .acct-nav-divider { display: none; }
+    .acct-nav-secondary { font-size: 10.5px; }
+  }
+  .acct-panel { display: none; }
+  .acct-panel.is-active { display: block; }
+  .acct-card { background: white; border: 1px solid #eee; border-radius: 16px; padding: 18px 20px; }
+  .acct-card-title { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: #999; text-transform: uppercase; }
+  .acct-status-pill { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 9999px; color: white; }
+  .status-delivered { background: #2FC26A; }
+  .status-ongoing { background: #3B9BFF; }
+  .status-cancelled { background: #FF5A5A; }
+  .acct-empty-icon { color: #ABABAB; }
+  .acct-tab { font-size: 13px; font-weight: 700; color: #999; padding-bottom: 10px; border-bottom: 2px solid transparent; }
+  .acct-tab.is-active { color: #2563EB; border-bottom-color: #2563EB; }
+  .acct-link { color: #2563EB; font-weight: 600; }
+  .acct-link:hover { text-decoration: underline; }
+  .acct-btn { display: inline-block; background: black; color: white; font-weight: 700; font-size: 13px; padding: 11px 22px; border-radius: 9px; transition: opacity 120ms ease; }
+  .acct-btn:hover { opacity: 0.85; }
+  .acct-btn-outline { display: inline-block; background: white; color: black; border: 1.5px solid black; font-weight: 700; font-size: 13px; padding: 10px 20px; border-radius: 9px; }
+  .acct-btn-sm { padding: 9px 16px; font-size: 12.5px; }
+  .acct-input { width: 100%; border: 1px solid #ddd; border-radius: 9px; padding: 9px 12px; font-size: 13px; outline: none; }
+  .acct-input:focus { border-color: #2563EB; }
+  @media (min-width: 768px) { #mobileSearchBtn { display: none !important; } }
+</style>
+</head>
+<body>
+<header id="siteHeader">
+  <div class="max-w-[1280px] mx-auto px-4 relative">
+    <div id="headerMainRow" class="h-[68px] flex items-center justify-between gap-4">
+      <div class="flex items-center shrink-0">
+        <button id="logoTextBtn" class="flex flex-col leading-none text-left" onclick="window.location.href='/'">
+          <span class="font-black tracking-tight text-white text-[20px]">PLUSH BABES</span>
+          <span class="font-tagline text-white/90 text-[12px] mt-[1px]">where the girlies shop</span>
+        </button>
+      </div>
+      <div id="desktopSearchWrap" class="hidden md:block flex-1 max-w-[420px] relative">
+        <div class="w-full h-[38px] bg-white rounded-full flex items-center px-4 gap-2">
+          <input id="searchInput" placeholder="Search dresses, bags, shoes..." autocomplete="off" class="bg-transparent outline-none text-[13px] w-full placeholder:text-black/40" />
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2" class="opacity-50 shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </div>
+        <div id="suggestDropdown" class="absolute top-[46px] left-0 w-full bg-white rounded-[16px] border border-black/5 overflow-hidden z-[100]">
+          <div class="p-2"><p class="text-[10px] font-bold tracking-widest text-black/40 px-3 py-2">SUGGESTIONS</p><div id="suggestList"></div></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-1">
+        <button id="mobileSearchBtn" class="icon-btn" aria-label="Search">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+        <a href="wishlist.html" class="icon-btn" aria-label="Wishlist">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </a>
+        <a href="bag.html" class="icon-btn relative" aria-label="Bag">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 7h12l-1 12H7L6 7z"/><path d="M9 7V5a3 3 0 016 0v2"/></svg>
+          <span id="bagCount" class="absolute -top-1 -right-1 bg-white text-black text-[8px] w-[14px] h-[14px] rounded-full flex items-center justify-center font-bold border border-black/10">0</span>
+        </a>
+        <a href="account.html#overview" class="icon-btn hidden sm:flex" aria-label="Account">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>
+        </a>
+        <div class="relative">
+          <button id="menuBtn" class="icon-btn" aria-label="Menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+          <div id="menuDropdown" class="absolute right-0 top-[46px] z-[100]"><div id="menuContent"></div></div>
+        </div>
+      </div>
+    </div>
+    <div id="mobileHeaderSearch" class="absolute inset-x-0 top-0 h-[68px] bg-[#FF8EBA] z-30 items-center gap-2 px-4">
+      <button id="mobileSearchBackInline" aria-label="Back" class="w-9 h-9 rounded-full bg-white/15 text-white flex items-center justify-center shrink-0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <div class="flex-1 h-[38px] bg-white rounded-full flex items-center px-4 gap-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2" class="opacity-40 shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="mobileSearchInput" placeholder="Search dresses, bags, shoes..." autocomplete="off" class="bg-transparent outline-none text-[13px] w-full placeholder:text-black/40" />
+      </div>
+    </div>
+    <div id="mobileSuggestDropdown" class="absolute top-[68px] left-0 right-0 bg-white border-t border-black/5 z-[99]">
+      <div class="p-3"><p class="text-[10px] font-bold tracking-widest text-black/40 px-2 py-2">SUGGESTIONS</p><div id="mobileSuggestList"></div></div>
+    </div>
+  </div>
+</header>
+<div class="max-w-[1280px] mx-auto px-4 py-8">
+  <div class="flex flex-col md:flex-row gap-6 items-start">
+    <aside class="w-full md:w-[260px] shrink-0 bg-white border border-[#eee] rounded-[16px] overflow-hidden">
+      <nav id="acctNav"></nav>
+    </aside>
+    <main class="flex-1 w-full bg-white border border-[#eee] rounded-[16px] p-6 md:p-8 min-h-[420px]">
+      <div class="acct-panel is-active" data-panel="overview">
+        <h1 class="font-black text-[20px]">Account Overview</h1>
+        <div class="grid sm:grid-cols-2 gap-4 mt-6">
+          <div class="acct-card">
+            <p id="acctName" class="font-bold text- mt-3"></p>
+            <p id="acctEmail" class="text- text-black/50"></p>
+            <p id="acctPhone" class="text- text-black/50 mt-1"></p>
+            <button class="acct-link text- mt-3" onclick="goToPanel('address'); openAddressEdit();">Edit</button>
+          </div>
+          <div class="acct-card relative">
+            <div class="flex items-center justify-between">
+              <p class="acct-card-title">Address Book</p>
+              <button aria-label="Edit address" class="acct-link" onclick="goToPanel('address'); openAddressEdit();">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              </button>
+            </div>
+            <p class="text-[13px] text-black/50 mt-3">Your default shipping address:</p>
+            <p id="overviewAddressText" class="text-[13.5px] mt-1 leading-relaxed"></p>
+          </div>
+          <div class="acct-card">
+            <p class="acct-card-title">Plush Credit</p>
+            <p class="text-[13.5px] mt-3"><a href="#" class="acct-link">Plush Credit balance: GH₵ 0</a></p>
+          </div>
+          <div class="acct-card">
+            <p class="acct-card-title">Newsletter Preferences</p>
+            <p class="text-[13px] text-black/50 mt-3">Manage your email communications to stay updated with the latest news and offers.</p>
+            <button class="acct-link text-[13px] mt-2" onclick="goToPanel('newsletter')">Edit Newsletter Preferences</button>
+          </div>
+        </div>
+      </div>
+      <div class="acct-panel" data-panel="orders">
+        <h1 class="font-black text-[20px]">Orders</h1>
+        <div class="flex items-center gap-6 mt-5 border-b border-[#eee]">
+          <button class="acct-tab is-active" data-tab="ongoing">ONGOING/DELIVERED (0)</button>
+          <button class="acct-tab" data-tab="cancelled">CANCELED/RETURNED (0)</button>
+        </div>
+        <div class="flex flex-col items-center text-center py-16">
+          <svg class="acct-empty-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+          <h3 class="font-black text-[16px] mt-4">No orders yet</h3>
+          <p class="text-black/50 text-[13px] mt-2 max-w-[300px]">Once you place an order, you'll be able to track it here.</p>
+          <button class="acct-btn mt-5">Start Shopping</button>
+        </div>
+      </div>
+      <div class="acct-panel" data-panel="inbox">
+        <h1 class="font-black text-[20px]">Inbox</h1>
+        <div class="flex flex-col items-center text-center py-16">
+          <svg class="acct-empty-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <h3 class="font-black text-[16px] mt-4">No messages yet</h3>
+          <p class="text-black/50 text-[13px] mt-2 max-w-[300px]">Order updates and messages from Plush Babes will show up here.</p>
+        </div>
+      </div>
+      <div class="acct-panel" data-panel="reviews">
+        <h1 class="font-black text-[20px]">Pending Reviews</h1>
+        <div class="flex flex-col items-center text-center py-16">
+          <svg class="acct-empty-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m12 3 2.6 5.8 6.4.7-4.7 4.4 1.3 6.3L12 17l-5.6 3.2 1.3-6.3L3 9.5l6.4-.7Z"/></svg>
+          <h3 class="font-black text-[16px] mt-4">Nothing to review yet</h3>
+          <p class="text-black/50 text-[13px] mt-2 max-w-[300px]">After an order is delivered, you can leave a review from here.</p>
+        </div>
+      </div>
+      <div class="acct-panel" data-panel="cards">
+        <h1 class="font-black text-[20px]">Plush Cards</h1>
+        <div class="flex flex-col items-center text-center py-16">
+          <svg class="acct-empty-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 12h18"/><path d="M12 7v12"/></svg>
+          <h3 class="font-black text-[16px] mt-4">Plush Cards are coming soon</h3>
+          <p class="text-black/50 text-[13px] mt-2 max-w-[320px]">Gift cards and store credit you can use across Plush Babes — on the way.</p>
+        </div>
+      </div>
+      <div class="acct-panel" data-panel="wishlist">
+        <h1 class="font-black text-[20px]">Wishlist (0)</h1>
+        <div class="flex flex-col items-center text-center py-16">
+          <svg class="acct-empty-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <h3 class="font-black text-[16px] mt-4">Your wishlist is empty</h3>
+          <p class="text-black/50 text-[13px] mt-2 max-w-[300px]">Tap the heart icon on any item to save it here.</p>
+          <button class="acct-btn mt-5">Start Shopping</button>
+        </div>
+      </div>
+      <div class="acct-panel" data-panel="sellers">
+        <h1 class="font-black text-[20px]">Followed Sellers</h1>
+        <div class="flex flex-col items-center text-center py-16">
+          <svg class="acct-empty-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 9V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/><path d="M3 9h18l-1 11H4L3 9Z"/><path d="M9 9v2a3 3 0 0 0 6 0V9"/></svg>
+          <h3 class="font-black text-[16px] mt-4">You don't follow any seller!</h3>
+          <p class="text-black/50 text-[13px] mt-2 max-w-[300px]">All your followed sellers will be displayed here</p>
+          <button class="acct-btn mt-5">Start Shopping</button>
+        </div>
+      </div>
+      <div class="acct-panel" data-panel="recent">
+        <h1 class="font-black text-[20px]">Recently Viewed</h1>
+        <div class="flex flex-col items-center text-center py-16">
+          <svg class="acct-empty-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          <h3 class="font-black text-[16px] mt-4">Nothing viewed yet</h3>
+          <p class="text-black/50 text-[13px] mt-2 max-w-[300px]">Items you look at will show up here so you can find them again.</p>
+        </div>
+      </div>
+      <div class="acct-panel" data-panel="management">
+        <h1 class="font-black text-">Account Management</h1>
+        <div class="acct-card mt-6 max-w-">
+          <p class="acct-card-title">Password</p>
+          <p id="pwdLastChanged" class="text- text-black/50 mt-2"></p>
+          <button class="acct-link text- mt-2" onclick="document.getElementById('changePwBox').style.display='block'">Change Password</button>
+          <div id="changePwBox" style="display:none;" class="mt-3">
+            <div class="relative">
+              <input id="newPassword" type="password" placeholder="New password (min 8)" class="acct-input pr-10" />
+              <button type="button" id="togglePw" class="absolute right-3 top-1/2 -translate-y-1/2 text-black/40 hover:text-black">
+                <svg id="eyeOn" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg id="eyeOff" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                  <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a18.45 18.45 0 0 1-2.16 3.19m-3.15-1.72a3 3 0 0 0-4.24-4.24"/><path d="M1 1l22 22"/>
+                </svg>
+              </button>
+            </div>
+            <button class="acct-btn acct-btn-sm mt-2" onclick="updatePassword()">Update Password</button>
+            <p id="pwMsg" class="text- mt-2"></p>
+          </div>
+        </div>
+        <div class="acct-card mt-4 max-w-">
+          <p class="acct-card-title">Phone Number</p>
+          <p id="mgmtPhone" class="text-[13.5px] mt-2"></p>
+          <button class="acct-link text- mt-2" onclick="goToPanel('address'); openAddressEdit();">Update</button>
+        </div>
+      </div>
+      <div class="acct-panel" data-panel="address">
+        <h1 class="font-black text-[20px]">Address Book</h1>
+        <div id="addressView" class="acct-card mt-6 max-w-[420px]">
+          <div class="flex items-center justify-between">
+            <p class="acct-card-title">Default Address</p>
+            <span class="text-[10px] font-bold bg-black text-white px-2 py-0.5 rounded-[6px]">DEFAULT</span>
+          </div>
+          <p id="addressViewText" class="text-[13.5px] mt-3 leading-relaxed"></p>
+          <button class="acct-link text-[13px] mt-3" onclick="openAddressEdit()">Edit Address</button>
+        </div>
+        <div id="addressEdit" class="acct-card mt-6 max-w-[420px]" style="display:none;">
+          <p class="acct-card-title mb-3">Edit Default Address</p>
+          <div class="space-y-3">
+            <div><label class="text-[11px] text-black/50 font-semibold">Full name</label><input id="addrName" type="text" class="acct-input mt-1" /></div>
+            <div><label class="text-[11px] text-black/50 font-semibold">Street / Area</label><input id="addrLine1" type="text" class="acct-input mt-1" /></div>
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="text-[11px] text-black/50 font-semibold">City</label><input id="addrCity" type="text" class="acct-input mt-1" /></div>
+              <div><label class="text-[11px] text-black/50 font-semibold">Region</label><input id="addrRegion" type="text" class="acct-input mt-1" /></div>
+            </div>
+            <div><label class="text-[11px] text-black/50 font-semibold">Phone</label><input id="addrPhone" type="text" class="acct-input mt-1" /></div>
+          </div>
+          <div class="flex items-center gap-2 mt-4">
+            <button class="acct-btn acct-btn-sm" onclick="saveAddressEdit()">Save Address</button>
+            <button class="acct-btn-outline acct-btn-sm" onclick="cancelAddressEdit()">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="acct-panel" data-panel="newsletter">
+        <h1 class="font-black text-[20px]">Newsletter Preferences</h1>
+        <div class="mt-6 max-w-[440px] divide-y divide-[#eee] border border-[#eee] rounded-[16px] overflow-hidden">
+          <label class="flex items-center justify-between p-4 cursor-pointer"><span class="text-[13.5px]">Restock & new arrival alerts</span><input type="checkbox" checked class="w-4 h-4 accent-black" /></label>
+          <label class="flex items-center justify-between p-4 cursor-pointer"><span class="text-[13.5px]">Groupay activity on my wishlist groups</span><input type="checkbox" checked class="w-4 h-4 accent-black" /></label>
+          <label class="flex items-center justify-between p-4 cursor-pointer"><span class="text-[13.5px]">Promotions & sales</span><input type="checkbox" class="w-4 h-4 accent-black" /></label>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<footer class="bg-[#2E2E2E]">
+  <div class="max-w-[1280px] mx-auto px-4 py-10">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div><p class="font-bold text-white text-[11px] tracking-[0.14em]">HELP</p><div class="mt-3 flex flex-col gap-2 text-white/55 text-[12.5px]"><a href="#" class="hover:text-white">How Groupay Works</a><a href="#" class="hover:text-white">Shipping & Delivery</a><a href="#" class="hover:text-white">Track an Order</a><a href="#" class="hover:text-white">FAQs</a></div></div>
+      <div><p class="font-bold text-white text-[11px] tracking-[0.14em]">ABOUT</p><div class="mt-3 flex flex-col gap-2 text-white/55 text-[12.5px]"><a href="#" class="hover:text-white">Our Story</a><a href="#" class="hover:text-white">Early Access Program</a><a href="#" class="hover:text-white">Contact Us</a></div></div>
+      <div><p class="font-bold text-white text-[11px] tracking-[0.14em]">SELL WITH US</p><div class="mt-3 flex flex-col gap-2 text-white/55 text-[12.5px]"><a href="#" class="hover:text-white">Become a Vendor</a><a href="#" class="hover:text-white">Vendor Dashboard</a></div></div>
+      <div><p class="font-bold text-white text-[11px] tracking-[0.14em]">FOLLOW US</p><div class="mt-3 flex items-center gap-3"><a href="#" aria-label="Instagram" class="hover:opacity-70"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a><a href="#" aria-label="TikTok" class="hover:opacity-70"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M14 3c.3 2 1.8 3.6 4 3.9v2.6c-1.4 0-2.8-.4-4-1.2v6.1a5.6 5.6 0 1 1-5.6-5.6c.3 0 .6 0 .9.1v2.7a2.9 2.9 0 1 0 2 2.8V3h2.7Z"/></svg></a><a href="#" aria-label="WhatsApp" class="hover:opacity-70"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M3 21l1.5-4.5A8 8 0 1 1 8 20L3 21Z"/><path d="M8.5 9.5c0 3 2 5 5 5"/></svg></a></div></div>
+    </div>
+    <div class="mt-10 border-t border-white/10 pt-5 flex flex-col md:flex-row justify-between items-center gap-2">
+      <p class="text-white/30 text-[11px]">© 2026 PLUSH BABES LTD. • Made in Ghana, Accra</p>
+      <p class="text-white/30 text-[11px]">Currently in Early Access</p>
+    </div>
+  </div>
+</footer>
+<script>
+// === MENU + SEARCH - UNIFIED ===
+const menuBtn = document.getElementById('menuBtn');
+const menuDropdown = document.getElementById('menuDropdown');
+document.getElementById('menuContent').innerHTML = `
+  <a href="/" class="menu-item">Home</a>
+  <button class="menu-item" data-go="overview">My Plush Account</button>
+  <button class="menu-item" data-go="orders">Orders</button>
+  <button class="menu-item" data-go="inbox">Inbox</button>
+  <button class="menu-item" data-go="wishlist">Wishlist</button>
+  <button class="menu-item" data-go="address">Address Book</button>
+  <div class="menu-divider"></div>
+  <button class="menu-item" style="color:#DC2626;" id="menuLogoutBtn">Logout</button>
+`;
+menuBtn.addEventListener('click', (e) => { e.stopPropagation(); menuDropdown.classList.toggle('is-open'); });
+document.addEventListener('click', (e) => {
+  if (!menuDropdown.contains(e.target) && e.target !== menuBtn) menuDropdown.classList.remove('is-open');
+});
+document.getElementById('menuContent').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-go]');
+  if (!btn) return;
+  goToPanel(btn.dataset.go);
+  menuDropdown.classList.remove('is-open');
+  history.replaceState(null,null,'#'+btn.dataset.go);
+});
+document.getElementById('menuContent').addEventListener('click', (e) => {
+  if (e.target.id === 'menuLogoutBtn') alert('Logged out (demo only)');
+});
+// === UNIFIED SEARCH - SVG ICONS ONLY, SAME AS BAG.HTML ===
+const SUPABASE_URL = "https://nkrvaaiasynlsfupdszq.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5rcnZhYWlhc3lubHNm [STRIPPED 75 bytes].Ag0mZOMwMtSgbB2zW818X7fD0yOaqufls0ib2nCtlQI";
+const SUGGESTIONS = ["Nails acrylic set", "Bags mini croc", "Shoes chunky heels","Wigs frontal lace", "Dresses satin slip", "Curve bodycon dress", "Dress", "Bags", "Shoes", "Wigs"];
+const CATEGORIES = ["Dresses", "Bags", "Shoes", "Wigs", "Nails", "Accessories", "Curve", "Beauty", "Clothing"];
+let allProductsCache = [];
+function normalizeText(str){
+  return (str||'').toLowerCase().trim().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ');
+}
+function getProductSuggestions(query){
+  const q = normalizeText(query);
+  if(!q) return { products: allProductsCache.slice(0,6), terms: SUGGESTIONS.slice(0,6), categories: [] };
+  const tokens = q.split(' ').filter(Boolean);
+  let products = [];
+  if(allProductsCache.length){
+    const scored = allProductsCache.map(p=>{
+      const title = normalizeText(p.title);
+      const cat = normalizeText(p.category);
+      const desc = normalizeText(p.description||'');
+      let score = 0;
+      if(title === q) score += 100;
+      if(title.includes(q)) score += 90;
+      tokens.forEach(tok=>{
+        if(tok.length < 2) return;
+        if(title.includes(tok)) score += 20;
+        if(cat.includes(tok)) score += 15;
+        if(desc.includes(tok)) score += 5;
+        if(title.split(' ').some(w=> w.startsWith(tok))) score += 10;
+        if(tok.length >=3){
+          const plural = tok + 'es';
+          const plural2 = tok + 's';
+          if(title.includes(plural) || title.includes(plural2) || cat.includes(plural) || cat.includes(plural2)) score += 12;
+        }
+      });
+      if(cat.includes(q)) score += 25;
+      return { product: p, score };
+    }).filter(x=> x.score > 0).sort((a,b)=> b.score - a.score);
+    products = scored.slice(0,8).map(x=> x.product);
+  }
+  const termPool = [...SUGGESTIONS, ...CATEGORIES];
+  const terms = termPool.filter(s=>{
+    const ns = normalizeText(s);
+    return tokens.some(tok=> tok.length>=2 && ns.includes(tok)) || ns.includes(q);
+  }).slice(0,6);
+  const categories = CATEGORIES.filter(c=> normalizeText(c).includes(q)).slice(0,4);
+  return { products, terms, categories };
+}
+async function fetchProductsForSuggestions(){
+  try{
+    if(window.supabase){
+      const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data } = await supa.from('vendor_products').select('*').eq('is_approved', true).limit(100);
+      if(data && data.length) allProductsCache = data;
+    }
+  }catch(e){}
+  if(!allProductsCache.length){
+    try{
+      const bag = JSON.parse(localStorage.getItem('pb_bag')||'[]');
+      const wl = JSON.parse(localStorage.getItem('pb_wishlist')||'[]');
+      allProductsCache = [...bag, ...wl];
+    }catch(e){}
+  }
+}
+fetchProductsForSuggestions();
+function renderDesktopSuggestions(query){
+  const list = document.getElementById('suggestList');
+  const dd = document.getElementById('suggestDropdown');
+  if(!list || !dd) return;
+  const { products, terms, categories } = getProductSuggestions(query);
+  let html = '';
+  if(products.length){
+    html += products.map(p=>`
+      <button data-term="${p.title}" class="suggest-item w-full text-left px-3 py-2.5 text-[13px] rounded-[10px] flex items-center gap-3">
+        <span class="w-10 h-10 rounded-[8px] bg-[#F5F5F5] overflow-hidden shrink-0"><img src="${(p.images&&p.images[0])||''}" class="w-full h-full object-cover"/></span>
+        <span class="flex-1 min-w-0"><span class="block truncate font-medium">${p.title}</span><span class="block text-[11px] text-black/40">GHS ${parseFloat(p.price||0).toFixed(2)} • ${p.category||'General'}</span></span>
+        <span class="opacity-40"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+      </button>
+    `).join('');
+  }
+  if(categories.length){
+    html += `<div class="mt-2 pt-2 border-t border-black/5"><p class="text-[10px] font-bold tracking-widest text-black/30 px-3 py-1">CATEGORIES</p>` + categories.map(c=>`
+      <button data-term="${c}" class="suggest-item w-full text-left px-3 py-2 text-[13px] rounded-[10px] flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[10px]">C</span>${c}<span class="ml-auto opacity-40"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span></button>
+    `).join('') + `</div>`;
+  }
+  if(terms.length){
+    const filtered = terms.filter(t=> !products.find(p=> p.title.toLowerCase()===t.toLowerCase()));
+    if(filtered.length) html += `<div class="${products.length||categories.length?'mt-2 pt-2 border-t border-black/5':''}"><p class="text-[10px] font-bold tracking-widest text-black/30 px-3 py-1">SEARCHES</p>` + filtered.slice(0,5).map(t=>`
+      <button data-term="${t}" class="suggest-item w-full text-left px-3 py-2 text-[13px] rounded-[10px] flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-[#F5F5F5] flex items-center justify-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>${t}</button>
+    `).join('') + `</div>`;
+  }
+  if(!html) html = SUGGESTIONS.slice(0,6).map(t=>`<button data-term="${t}" class="suggest-item w-full text-left px-3 py-2 text-[13px] rounded-[10px] flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-[#F5F5F5] flex items-center justify-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>${t}</button>`).join('');
+  list.innerHTML = html;
+  dd.classList.add('is-open');
+}
+function renderMobileSuggestions(query){
+  const list = document.getElementById('mobileSuggestList');
+  const dd = document.getElementById('mobileSuggestDropdown');
+  if(!list || !dd) return;
+  const { products, terms, categories } = getProductSuggestions(query);
+  let html = '';
+  if(products.length){
+    html += products.map(p=>`
+      <button data-term="${p.title}" class="w-full text-left p-2.5 rounded-[12px] border border-black/5 flex gap-3 hover:bg-[#FFF0F6]">
+        <span class="w-12 h-12 rounded-[8px] bg-[#F5F5F5] overflow-hidden shrink-0"><img src="${(p.images&&p.images[0])||''}" class="w-full h-full object-cover"/></span>
+        <span class="flex-1 min-w-0 text-left"><span class="block font-bold text-[13px] truncate">${p.title}</span><span class="block text-[11px] text-black/40">${p.category||'General'} • GHS ${parseFloat(p.price||0).toFixed(2)}</span></span>
+        <span class="flex items-center opacity-40"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+      </button>
+    `).join('');
+  }
+  if(categories.length){
+    html += `<div class="mt-2"><p class="text-[10px] font-bold tracking-widest text-black/30 px-2 py-1">CATEGORIES</p>` + categories.map(c=>`<button data-term="${c}" class="w-full text-left px-2 py-2.5 text-[14px] rounded-[10px] flex items-center gap-3 hover:bg-[#FFF0F6]"><span class="w-7 h-7 rounded-full bg-black text-white flex items-center justify-center text-[10px]">C</span>${c}<span class="ml-auto opacity-40"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span></button>`).join('') + `</div>`;
+  }
+  if(terms.length){
+    const filtered = terms.filter(t=> !products.find(p=> p.title.toLowerCase()===t.toLowerCase()));
+    if(filtered.length) html += `<div class="mt-2"><p class="text-[10px] font-bold tracking-widest text-black/30 px-2 py-1">SEARCHES</p>` + filtered.slice(0,5).map(t=>`<button data-term="${t}" class="w-full text-left px-2 py-3 text-[14px] rounded-[10px] flex items-center gap-3 hover:bg-[#FFF0F6]"><span class="w-7 h-7 rounded-full bg-[#F5F5F5] flex items-center justify-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>${t}</button>`).join('') + `</div>`;
+  }
+  if(!html) html = SUGGESTIONS.slice(0,6).map(t=>`<button data-term="${t}" class="w-full text-left px-2 py-3 text-[14px] rounded-[10px] flex items-center gap-3 hover:bg-[#FFF0F6]"><span class="w-7 h-7 rounded-full bg-[#F5F5F5] flex items-center justify-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>${t}</button>`).join('');
+  list.innerHTML = html;
+  dd.classList.remove('hidden');
+  dd.classList.add('is-open');
+}
+function openMobileHeaderSearch(){
+  const mh = document.getElementById('mobileHeaderSearch');
+  const hr = document.getElementById('headerMainRow');
+  if(mh){ mh.classList.remove('hidden'); mh.classList.add('is-open'); }
+  if(hr) hr.classList.add('is-hidden');
+  setTimeout(()=>{ const inp = document.getElementById('mobileSearchInput'); if(inp){ inp.focus(); renderMobileSuggestions(inp.value||''); } }, 80);
+}
+function closeMobileHeaderSearch(){
+  const mh = document.getElementById('mobileHeaderSearch');
+  const dd = document.getElementById('mobileSuggestDropdown');
+  const hr = document.getElementById('headerMainRow');
+  if(mh){ mh.classList.add('hidden'); mh.classList.remove('is-open'); }
+  if(dd){ dd.classList.add('hidden'); dd.classList.remove('is-open'); }
+  if(hr) hr.classList.remove('is-hidden');
+}
+const searchInput = document.getElementById('searchInput');
+const suggestDropdown = document.getElementById('suggestDropdown');
+if(searchInput){
+  searchInput.addEventListener('focus', ()=> renderDesktopSuggestions(searchInput.value));
+  searchInput.addEventListener('input', (e)=>{
+    const q = e.target.value.trim();
+    if(!q){ document.getElementById('suggestList').innerHTML=''; suggestDropdown.classList.remove('is-open'); return; }
+    renderDesktopSuggestions(q);
+  });
+  searchInput.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter'){
+      const q = e.target.value.trim();
+      if(q) window.location.href = `/index.html?search=${encodeURIComponent(q)}`;
+    }
+  });
+}
+document.getElementById('suggestList')?.addEventListener('click', (e)=>{
+  const btn = e.target.closest('[data-term]');
+  if(btn){ window.location.href = `/index.html?search=${encodeURIComponent(btn.dataset.term)}`; }
+});
+document.getElementById('mobileSuggestList')?.addEventListener('click', (e)=>{
+  const btn = e.target.closest('[data-term]');
+  if(btn){ closeMobileHeaderSearch(); window.location.href = `/index.html?search=${encodeURIComponent(btn.dataset.term)}`; }
+});
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('#searchInput') && !e.target.closest('#suggestDropdown')){
+    suggestDropdown?.classList.remove('is-open');
+  }
+});
+document.getElementById('mobileSearchBtn')?.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  openMobileHeaderSearch();
+});
+document.getElementById('mobileSearchBackInline')?.addEventListener('click', closeMobileHeaderSearch);
+const mobileSearchInput = document.getElementById('mobileSearchInput');
+if(mobileSearchInput){
+  mobileSearchInput.addEventListener('input', (e)=>{
+    const q = e.target.value.trim();
+    renderMobileSuggestions(q);
+    if(searchInput) searchInput.value = q;
+  });
+  mobileSearchInput.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter'){
+      const q = e.target.value.trim();
+      if(q){ closeMobileHeaderSearch(); window.location.href = `/index.html?search=${encodeURIComponent(q)}`; }
+    }
+    if(e.key==='Escape') closeMobileHeaderSearch();
+  });
+}
+// === ACCOUNT PANELS - UNCHANGED ===
+const NAV_ITEMS = [
+  { panel: 'overview', label: 'My Plush Account', icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>` },
+  { panel: 'orders', label: 'Orders', icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>` },
+  { panel: 'inbox', label: 'Inbox', icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>` },
+  { panel: 'reviews', label: 'Pending Reviews', icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.6 5.8 6.4.7-4.7 4.4 1.3 6.3L12 17l-5.6 3.2 1.3-6.3L3 9.5l6.4-.7Z"/></svg>` },
+  { panel: 'cards', label: 'Plush Cards', icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 12h18"/><path d="M12 7v12"/></svg>` },
+  { panel: 'wishlist', label: 'Wishlist', icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>` },
+  { panel: 'sellers', label: 'Followed Sellers', icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/><path d="M3 9h18l-1 11H4L3 9Z"/><path d="M9 9v2a3 3 0 0 0 6 0V9"/></svg>` },
+  { panel: 'recent', label: 'Recently Viewed', icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>` },
+];
+const NAV_SECONDARY_ITEMS = [
+  { panel: 'management', label: 'Account Management' },
+  { panel: 'address', label: 'Address Book' },
+  { panel: 'newsletter', label: 'Newsletter Preferences' },
+];
+const acctNavEl = document.getElementById('acctNav');
+function renderNav() {
+  const primary = NAV_ITEMS.map(item => `
+    <button class="acct-nav-item" data-panel-target="${item.panel}">
+      ${item.icon}
+      <span>${item.label}</span>
+    </button>
+  `).join('');
+  const secondary = NAV_SECONDARY_ITEMS.map(item => `
+    <button class="acct-nav-item acct-nav-secondary" data-panel-target="${item.panel}">
+      <span>${item.label}</span>
+    </button>
+  `).join('');
+  acctNavEl.innerHTML = primary + `<div class="acct-nav-divider"></div>` + secondary + `<div class="acct-nav-divider"></div>` + `<button class="acct-nav-item acct-nav-secondary" style="color:#DC2626;" id="logoutBtn">Logout</button>`;
+}
+renderNav();
+function goToPanel(panelName) {
+  document.querySelectorAll('.acct-panel').forEach(el => {
+    el.classList.toggle('is-active', el.dataset.panel === panelName);
+  });
+  document.querySelectorAll('[data-panel-target]').forEach(el => {
+    el.classList.toggle('is-active', el.dataset.panelTarget === panelName);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+acctNavEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-panel-target]');
+  if (!btn) return;
+  goToPanel(btn.dataset.panelTarget);
+  history.replaceState(null,null,'#'+btn.dataset.panelTarget);
+});
+const initial = location.hash.replace('#','') || 'overview';
+goToPanel(initial);
+document.getElementById('logoutBtn')?.addEventListener('click', () => { alert('Logged out (demo only)'); });
+document.querySelectorAll('.acct-tab').forEach(tabBtn => {
+  tabBtn.addEventListener('click', () => {
+    const group = tabBtn.parentElement;
+    group.querySelectorAll('.acct-tab').forEach(t => t.classList.remove('is-active'));
+    tabBtn.classList.add('is-active');
+  });
+});
+const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let addressState = { name: '—', line1: 'Accra', city: 'Amasaman', region: 'Greater Accra', phone: '—', email: '' };
+function renderAddressView(){
+  const html = `${addressState.name}<br/>${addressState.line1}<br/>${addressState.city}, ${addressState.region}<br/>${addressState.phone}`;
+  document.getElementById('addressViewText').innerHTML = html;
+  document.getElementById('overviewAddressText').innerHTML = html;
+  document.getElementById('acctName').textContent = addressState.name;
+  document.getElementById('acctEmail').textContent = addressState.email;
+  document.getElementById('acctPhone').textContent = addressState.phone;
+  const mp = document.getElementById('mgmtPhone'); if(mp) mp.textContent = addressState.phone || 'Not set';
+}
+function openAddressEdit(){
+  document.getElementById('addrName').value = addressState.name;
+  document.getElementById('addrLine1').value = addressState.line1;
+  document.getElementById('addrCity').value = addressState.city;
+  document.getElementById('addrRegion').value = addressState.region;
+  document.getElementById('addrPhone').value = addressState.phone;
+  document.getElementById('addressView').style.display='none';
+  document.getElementById('addressEdit').style.display='block';
+}
+function cancelAddressEdit(){
+  document.getElementById('addressEdit').style.display='none';
+  document.getElementById('addressView').style.display='block';
+}
+async function saveAddressEdit(){
+  addressState = {
+    name: document.getElementById('addrName').value.trim() || addressState.name,
+    line1: document.getElementById('addrLine1').value.trim() || addressState.line1,
+    city: document.getElementById('addrCity').value.trim() || addressState.city,
+    region: document.getElementById('addrRegion').value.trim() || addressState.region,
+    phone: document.getElementById('addrPhone').value.trim() || addressState.phone,
+    email: addressState.email
+  };
+  renderAddressView();
+  cancelAddressEdit();
+  const { data:{user} } = await supa.auth.getUser();
+  if(user){
+    try{ await supa.from('users').upsert({ email: user.email, full_name: addressState.name, phone: addressState.phone }, {onConflict:'email'}); }catch(e){}
+  }
+}
+async function loadRealUser(){
+  const { data:{session} } = await supa.auth.getSession();
+  if(!session){ const pending = localStorage.getItem('pb_pending_email'); if(pending){ addressState = { name: pending.split('@')[0], line1: 'Accra', city: 'Amasaman', region: 'Greater Accra', phone: localStorage.getItem('pb_pending_phone')||'', email: pending }; renderAddressView(); return; } return; }
+  const user = session.user;
+  const lastChanged = user.updated_at? new Date(user.updated_at).toLocaleDateString() : 'Recently';
+  const pwdEl = document.getElementById('pwdLastChanged'); if(pwdEl) pwdEl.textContent = `Last changed: ${lastChanged}`;
+  addressState = { name: user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0], line1: 'Accra', city: 'Amasaman', region: 'Greater Accra', phone: user.user_metadata?.phone || user.phone || '', email: user.email };
+  renderAddressView();
+  try{ const { data:row } = await supa.from('users').select('*').eq('email', user.email).maybeSingle(); if(row){ addressState.name = row.full_name || row.name || addressState.name; addressState.phone = row.phone || addressState.phone; renderAddressView(); } }catch(e){}
+}
+async function updatePassword(){
+  const newPw = document.getElementById('newPassword').value;
+  if(newPw.length < 8){ document.getElementById('pwMsg').textContent = "Min 8 chars"; return; }
+  const { error } = await supa.auth.updateUser({ password: newPw });
+  document.getElementById('pwMsg').textContent = error? error.message : "Password updated!";
+  if(!error) document.getElementById('pwdLastChanged').textContent = `Last changed: ${new Date().toLocaleDateString()}`;
+}
+document.getElementById('togglePw')?.addEventListener('click',()=>{
+  const inp=document.getElementById('newPassword');
+  const on=document.getElementById('eyeOn');
+  const off=document.getElementById('eyeOff');
+  const isPw = inp.type==='password';
+  inp.type=isPw?'text':'password';
+  on.style.display=isPw?'none':'block';
+  off.style.display=isPw?'block':'none';
+});
+// bag count
+function updateBagCount(){
+  try{ const bag = JSON.parse(localStorage.getItem('pb_bag')||'[]'); const total = bag.reduce((a,b)=>a+(b.qty||1),0); const el = document.getElementById('bagCount'); if(el){ el.textContent=total; el.style.display= total? 'flex':'none'; } }catch(e){}
+}
+updateBagCount();
+loadRealUser();
+</script>
+</body>
+</html>

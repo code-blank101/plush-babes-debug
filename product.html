@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<title>Product — PLUSH BABES</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; background:#FFFBFD; }
+.font-tagline { font-family: 'Indie Flower', cursive; }
+#siteHeader { background-color: rgba(255, 142, 186, 1); }
+.star-filled { color:#111; }
+.star-empty { color:#E5E5E5; }
+.img-thumb.active { box-shadow:0 0 0 2px black; border-color:black; }
+body{ padding-top:68px; margin:0; }
+#siteHeader{ background:#FF8EBA; position:fixed !important; top:0; left:0; right:0; z-index:50; }
+.icon-btn{ width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:9999px;color:white; }
+#suggestDropdown.is-open, #mobileSuggestDropdown.is-open{ display:block !important; }
+#mobileHeaderSearch.is-open{ display:flex !important; }
+#headerMainRow.is-hidden{ opacity:0; pointer-events:none; }
+.wishlist-active{ background:#111 !important; color:white !important; }
+.wishlist-active svg{ fill:#FF3B5C; stroke:#FF3B5C; }
+#suggestDropdown, #mobileSuggestDropdown, #menuDropdown, #mobileHeaderSearch { display:none; }
+#suggestDropdown.is-open, #mobileSuggestDropdown.is-open { display:block !important; }
+#menuDropdown.is-open { display:block !important; }
+#mobileHeaderSearch.is-open { display:flex !important; }
+@keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+.skeleton-shimmer{ position:relative; overflow:hidden; background:#F0F0F0; }
+.skeleton-shimmer::after{ content:""; position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); animation:shimmer 1.5s infinite; }
+</style>
+</head>
+<body class="bg-[#FFFBFD]">
+<header id="siteHeader">
+  <div class="max-w-[1280px] mx-auto px-4 relative">
+    <div id="headerMainRow" class="h-[68px] flex items-center justify-between gap-4">
+      <div class="flex items-center shrink-0">
+        <button onclick="window.location.href='/'" class="flex flex-col leading-none text-left">
+          <span class="font-black tracking-tight text-white text-[20px]">PLUSH BABES</span>
+          <span class="font-tagline text-white/90 text-[12px] mt-[1px]">where the girlies shop</span>
+        </button>
+      </div>
+      <div id="desktopSearchWrap" class="hidden md:block flex-1 max-w-[420px] relative">
+        <div class="w-full h-[38px] bg-white rounded-full flex items-center px-4 gap-2">
+          <input id="searchInput" placeholder="Search dresses, bags, shoes..." autocomplete="off" class="bg-transparent outline-none text-[13px] w-full placeholder:text-black/40" />
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2" class="opacity-50 shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </div>
+        <div id="suggestDropdown" class="absolute top-[46px] left-0 w-full bg-white rounded-[16px] border border-black/5 overflow-hidden z-[100]">
+          <div class="p-2"><p class="text-[10px] font-bold tracking-widest text-black/40 px-3 py-2">SUGGESTIONS</p><div id="suggestList"></div></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-1">
+        <button id="mobileSearchBtn" class="icon-btn" aria-label="Search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
+        <a href="wishlist.html" class="icon-btn relative"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span id="wishlistCount" class="absolute -top-1 -right-1 bg-white text-black text-[8px] w-[14px] h-[14px] rounded-full flex items-center justify-center font-bold border border-black/10 hidden">0</span></a>
+        <a href="bag.html" class="icon-btn relative"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 7h12l-1 12H7L6 7z"/><path d="M9 7V5a3 3 0 016 0v2"/></svg><span id="bagCount" class="absolute -top-1 -right-1 bg-white text-black text-[8px] w-[14px] h-[14px] rounded-full flex items-center justify-center font-bold border border-black/10 hidden">0</span></a>
+        <a href="account.html#overview" class="icon-btn hidden sm:flex" aria-label="Account"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg></a>
+        <div class="relative"><button id="menuBtn" class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div id="menuDropdown" class="absolute right-0 top-[46px] z-[100]"><div id="menuContent"></div></div></div>
+      </div>
+    </div>
+    <div id="mobileHeaderSearch" class="hidden absolute inset-x-0 top-0 h-[68px] bg-[#FF8EBA] z-30 items-center gap-2 px-4">
+      <button id="mobileSearchBackInline" class="w-9 h-9 rounded-full bg-white/15 text-white flex items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 18-6-6 6-6"/></svg></button>
+      <div class="flex-1 h-[38px] bg-white rounded-full flex items-center px-4 gap-2"><input id="mobileSearchInput" placeholder="Search..." class="bg-transparent outline-none text-[13px] w-full placeholder:text-black/40" /></div>
+    </div>
+    <div id="mobileSuggestDropdown" class="hidden absolute top-[68px] left-0 right-0 bg-white border-t border-black/5 z-[99]"><div class="p-3"><div id="mobileSuggestList"></div></div></div>
+  </div>
+</header>
+<main id="mainContent" class="max-w-[1280px] mx-auto px-4 py-4 md:py-8">
+  <a href="index.html" class="inline-flex items-center gap-2 text-[12px] font-bold mb-4 hover:underline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg> Back to shop</a>
+  
+  <!-- ONLY SKELETON - NO TEXT LOADING -->
+  <div id="productSkeleton">
+    <div class="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 bg-white border border-black/10 rounded-[20px] p-4 md:p-6">
+      <div class="space-y-3">
+        <div class="aspect-[1/1] bg-[#F0F0F0] rounded-[16px] skeleton-shimmer"></div>
+        <div class="grid grid-cols-4 gap-2"><div class="aspect-square bg-[#F0F0F0] rounded-[12px] skeleton-shimmer"></div><div class="aspect-square bg-[#F0F0F0] rounded-[12px] skeleton-shimmer"></div><div class="aspect-square bg-[#F0F0F0] rounded-[12px] skeleton-shimmer"></div><div class="aspect-square bg-[#F0F0F0] rounded-[12px] skeleton-shimmer"></div></div>
+      </div>
+      <div class="space-y-4">
+        <div class="h-3 w-24 bg-[#F0F0F0] rounded-full skeleton-shimmer"></div>
+        <div class="h-7 w-full bg-[#F0F0F0] rounded-[10px] skeleton-shimmer"></div>
+        <div class="h-7 w-3/4 bg-[#F0F0F0] rounded-[10px] skeleton-shimmer"></div>
+        <div class="h-5 w-32 bg-[#F0F0F0] rounded-full skeleton-shimmer"></div>
+        <div class="h-4 w-full bg-[#F0F0F0] rounded-full skeleton-shimmer"></div>
+        <div class="h-4 w-full bg-[#F0F0F0] rounded-full skeleton-shimmer"></div>
+        <div class="h-12 w-full bg-[#F0F0F0] rounded-full skeleton-shimmer mt-8"></div>
+        <div class="grid grid-cols-2 gap-2"><div class="h-11 bg-[#F0F0F0] rounded-full skeleton-shimmer"></div><div class="h-11 bg-[#F0F0F0] rounded-full skeleton-shimmer"></div></div>
+      </div>
+    </div>
+  </div>
+  <div id="productContent" class="hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 md:gap-8 bg-white border border-black/10 rounded-[20px] p-4 md:p-6">
+      <div>
+        <div class="aspect-[1/1] bg-[#F5F5F5] rounded-[16px] overflow-hidden relative">
+          <img id="mainImage" src="" alt="" class="w-full h-full object-cover" />
+          <button id="wishlistBtn" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </button>
+          <div id="regionBadge" class="absolute bottom-3 left-3 bg-black text-white text-[10px] font-bold px-2.5 py-1 rounded-full"></div>
+        </div>
+        <div id="thumbGrid" class="grid grid-cols-4 gap-2 mt-3"></div>
+      </div>
+      <div class="flex flex-col">
+        <div class="flex items-center gap-2">
+          <span id="productCategory" class="text-[10px] font-bold tracking-widest uppercase text-black/40"></span>
+          <span id="productStock" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5F5F5]"></span>
+        </div>
+        <h1 id="productTitle" class="font-black text-[22px] md:text-[28px] leading-tight mt-2"></h1>
+        <div class="flex items-center gap-2 mt-3">
+          <div id="productStars" class="flex text-[14px]"></div>
+          <span id="productRatingText" class="text-[12px] font-bold"></span>
+          <span id="productReviewCount" class="text-[11px] text-black/40"></span>
+        </div>
+        <div class="mt-4 flex items-baseline gap-3">
+          <span id="productPrice" class="font-black text-[24px]"></span>
+          <span id="productComparePrice" class="text-[13px] text-black/30 line-through hidden"></span>
+        </div>
+        <p id="productDesc" class="text-[13px] text-black/60 leading-[1.6] mt-4"></p>
+        <div id="productVariants" class="mt-6 space-y-4"></div>
+        <div class="mt-6 flex gap-2">
+          <button id="addToBagBtn" class="flex-1 h-12 rounded-full bg-black text-white font-bold text-[13px]">Add to Bag</button>
+          <button id="buyNowBtn" class="flex-1 h-12 rounded-full bg-[#FF8EBA] text-black font-bold text-[13px]">Buy Now</button>
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-2">
+          <button id="shareBtn" class="h-11 rounded-full border border-black/10 text-[11px] font-bold flex items-center justify-center gap-2 hover:bg-black hover:text-white transition"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> Share</button>
+          <button id="copyLinkBtn" class="h-11 rounded-full border border-black/10 text-[11px] font-bold flex items-center justify-center gap-2 hover:bg-black hover:text-white transition"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Copy Link</button>
+        </div>
+        <div class="mt-6 p-3 rounded-[12px] bg-[#FFFBFD] border border-black/5">
+          <p class="text-[11px] font-bold tracking-widest uppercase text-black/40">Delivery</p>
+          <p class="text-[12px] mt-1">Delivers to <span id="deliveryRegion" class="font-bold"></span> • 2-3 days • Pay on delivery available</p>
+        </div>
+      </div>
+    </div>
+    <div class="mt-8 bg-white border border-black/10 rounded-[20px] p-4 md:p-6">
+      <div class="flex items-center justify-between">
+        <h2 class="font-black text-[18px]">Reviews</h2>
+        <button id="writeReviewBtn" class="h-9 px-4 rounded-full bg-black text-white text-[11px] font-bold">Write a review</button>
+      </div>
+      <div id="reviewsSummary" class="mt-4 flex items-center gap-4"></div>
+      <div id="reviewForm" class="hidden mt-6 p-4 border border-black/10 rounded-[16px] bg-[#FFFBFD]">
+        <p class="font-bold text-[12px] mb-2">Rate this product</p>
+        <div id="reviewStarsInput" class="flex gap-1 text-[24px] cursor-pointer mb-3"><span data-star="1">☆</span><span data-star="2">☆</span><span data-star="3">☆</span><span data-star="4">☆</span><span data-star="5">☆</span></div>
+        <textarea id="reviewText" placeholder="What did you like?" class="w-full h-20 rounded-[12px] border border-black/10 p-3 text-[13px] outline-none"></textarea>
+        <div class="flex gap-2 mt-3"><button id="submitReviewBtn" class="h-9 px-5 rounded-full bg-black text-white text-[11px] font-bold">Submit review</button><button id="cancelReviewBtn" class="h-9 px-5 rounded-full border border-black/10 text-[11px] font-bold">Cancel</button></div>
+      </div>
+      <div id="reviewsList" class="mt-6 space-y-4"></div>
+    </div>
+    <div class="mt-8"><h2 class="font-black text-[18px] mb-4">Similar products</h2><div id="similarGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"></div></div>
+  </div>
+</main>
+<footer class="bg-[#2E2E2E]"><div class="max-w-[1280px] mx-auto px-4 py-10"><div class="grid grid-cols-2 md:grid-cols-4 gap-8"><div><p class="font-bold text-white text-[11px] tracking-[0.14em]">HELP</p><div class="mt-3 flex flex-col gap-2 text-white/55 text-[12.5px]"><a href="#" class="hover:text-white">How Groupay Works</a><a href="#" class="hover:text-white">Shipping & Delivery</a><a href="#" class="hover:text-white">Track an Order</a><a href="#" class="hover:text-white">FAQs</a></div></div><div><p class="font-bold text-white text-[11px] tracking-[0.14em]">ABOUT</p><div class="mt-3 flex flex-col gap-2 text-white/55 text-[12.5px]"><a href="#" class="hover:text-white">Our Story</a><a href="#" class="hover:text-white">Early Access Program</a><a href="#" class="hover:text-white">Contact Us</a></div></div><div><p class="font-bold text-white text-[11px] tracking-[0.14em]">SELL WITH US</p><div class="mt-3 flex flex-col gap-2 text-white/55 text-[12.5px]"><a href="#" class="hover:text-white">Become a Vendor</a><a href="#" class="hover:text-white">Vendor Dashboard</a></div></div><div><p class="font-bold text-white text-[11px] tracking-[0.14em]">FOLLOW US</p><div class="mt-3 flex items-center gap-3"><a href="#" aria-label="Instagram" class="hover:opacity-70"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a></div></div></div><div class="mt-10 border-t border-white/10 pt-5 flex flex-col md:flex-row justify-between items-center gap-2"><p class="text-white/30 text-[11px]">© 2026 PLUSH BABES LTD. • Made in Ghana, Accra</p><p class="text-white/30 text-[11px]">Currently in Early Access</p></div></div></footer>
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white text-[12px] font-bold px-4 py-2 rounded-full hidden z-[100]"></div>
+<script src="public/js/script.js"></script>
+<script>
+const SUPABASE_URL_P = "https://nkrvaaiasynlsfupdszq.supabase.co";
+const SUPABASE_ANON_KEY_P = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5rcnZhYWlhc3lubHNmdXBkc3pxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0NjI2MjYsImV4cCI6MjEwMDAzODYyNn0.Ag0mZOMwMtSgbB2zW818X7fD0yOaqufls0ib2nCtlQI";
+const supaP = window.supabase ? window.supabase.createClient(SUPABASE_URL_P, SUPABASE_ANON_KEY_P) : null;
+let currentProduct = null;
+let selectedRating = 0;
+function getProductIdFromUrl(){ const params = new URLSearchParams(window.location.search); return params.get('id'); }
+function showToastP(msg){ const t=document.getElementById('toast'); if(!t) return; t.textContent=msg; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'),2500); }
+function renderStars(rating){ let html=''; for(let i=1;i<=5;i++){ html+=`<span class="${i<=Math.round(rating)?'star-filled':'star-empty'}">★</span>`; } return html; }
+async function loadProduct(){
+  const id=getProductIdFromUrl();
+  if(!id){ document.getElementById('productSkeleton')?.classList.add('hidden'); document.getElementById('productContent').innerHTML='<p class="py-20 text-center">No product ID</p>'; document.getElementById('productContent')?.classList.remove('hidden'); return; }
+  try{
+    const { data, error } = await supaP.from('vendor_products').select('*').eq('id', id).single();
+    if(error) throw error;
+    currentProduct=data;
+    try{ await supaP.from('product_views').insert({ product_id: id, viewed_at: new Date().toISOString() }); }catch(e){}
+    renderProduct(data);
+    loadReviews(id);
+    loadSimilar(data);
+  }catch(e){
+    document.getElementById('productSkeleton')?.classList.add('hidden');
+    const pc=document.getElementById('productContent'); if(pc){ pc.classList.remove('hidden'); pc.innerHTML=`<div class="py-20 text-center"><p class="font-black">Product not found</p><a href="index.html" class="text-[12px] underline mt-2 inline-block">Back to shop</a></div>`; }
+  }
+}
+function renderProduct(p){
+  document.getElementById('productSkeleton')?.classList.add('hidden');
+  document.getElementById('productContent')?.classList.remove('hidden');
+  document.getElementById('productTitle').textContent=p.title;
+  document.getElementById('productCategory').textContent=p.category;
+  document.getElementById('productPrice').textContent=`GHS ${parseFloat(p.price).toFixed(2)}`;
+  if(p.compare_price){ const cp=document.getElementById('productComparePrice'); if(cp){ cp.textContent=`GHS ${parseFloat(p.compare_price).toFixed(2)}`; cp.classList.remove('hidden'); } }
+  const descEl=document.getElementById('productDesc'); if(descEl) descEl.textContent=p.description||'';
+  const stockEl=document.getElementById('productStock'); if(stockEl) stockEl.textContent=`${p.total_stock||0} in stock`;
+  const regionBadge=document.getElementById('regionBadge'); if(regionBadge) regionBadge.textContent=p.region||p.city||'Ghana';
+  const delReg=document.getElementById('deliveryRegion'); if(delReg) delReg.textContent=localStorage.getItem('pb_user_region')||'your region';
+  const mainImg=document.getElementById('mainImage'); if(mainImg) mainImg.src=(p.images&&p.images[0])||'https://via.placeholder.com/600x600/F5F5F5/999?text=No+Image';
+  const thumbs=document.getElementById('thumbGrid'); if(thumbs) thumbs.innerHTML=(p.images||[]).slice(0,4).map((img,i)=>`<button class="img-thumb aspect-square rounded-[12px] overflow-hidden border border-black/10 ${i===0?'active':''}" onclick="document.getElementById('mainImage').src='${img}'; document.querySelectorAll('.img-thumb').forEach(t=>t.classList.remove('active')); this.classList.add('active')"><img src="${img}" class="w-full h-full object-cover"/></button>`).join('');
+  const varEl=document.getElementById('productVariants'); if(varEl){ let html=''; if(p.colors&&p.colors.length){ html+=`<div><p class="text-[11px] font-bold tracking-widest uppercase text-black/40 mb-2">Colors</p><div class="flex gap-2 flex-wrap">${p.colors.map(c=>`<button class="h-8 px-3 rounded-full border border-black/10 text-[11px] font-bold">${c.name||c}</button>`).join('')}</div></div>`; } if(p.sizes&&p.sizes.length){ html+=`<div><p class="text-[11px] font-bold tracking-widest uppercase text-black/40 mb-2">Sizes</p><div class="flex gap-2 flex-wrap">${p.sizes.map(s=>`<button class="h-8 px-3 rounded-full border border-black/10 text-[11px] font-bold">${s}</button>`).join('')}</div></div>`; } varEl.innerHTML=html; }
+  document.title=`${p.title} — PLUSH BABES`;
+}
+let currentUserP=null; let reviewLikesCache={}, reviewRepliesCache={};
+async function getCurrentUserP(){ try{ const {data:{user}}=await supaP.auth.getUser(); currentUserP=user; return user; }catch{ return null; } }
+async function loadReviews(productId){
+  await getCurrentUserP();
+  try{
+    const { data } = await supaP.from('product_reviews').select('*').eq('product_id', productId).order('created_at',{ascending:false});
+    const reviews=data||[]; const avg=reviews.length?(reviews.reduce((a,b)=>a+b.rating,0)/reviews.length):0;
+    const starsEl=document.getElementById('productStars'); if(starsEl) starsEl.innerHTML=renderStars(avg);
+    const ratingText=document.getElementById('productRatingText'); if(ratingText) ratingText.textContent=reviews.length?`${avg.toFixed(1)}`:'No ratings';
+    const reviewCount=document.getElementById('productReviewCount'); if(reviewCount) reviewCount.textContent=reviews.length?`(${reviews.length})`:'';
+    const summary=document.getElementById('reviewsSummary'); if(summary) summary.innerHTML=reviews.length?`<div class="flex items-baseline gap-2"><span class="font-black text-[28px]">${avg.toFixed(1)}</span><span class="text-[12px] text-black/40">/ 5 • ${reviews.length} reviews</span></div><div class="flex text-[16px]">${renderStars(avg)}</div>`:`<p class="text-[12px] text-black/40">No reviews yet — be first</p>`;
+    reviewLikesCache={}; reviewRepliesCache={}; const rIds=reviews.map(r=>r.id);
+    if(rIds.length){
+      try{ const {data:likes}=await supaP.from('product_review_likes').select('review_id,user_id').in('review_id', rIds); if(likes){ likes.forEach(l=>{ if(!reviewLikesCache[l.review_id]) reviewLikesCache[l.review_id]=[]; reviewLikesCache[l.review_id].push(l.user_id); }); } }catch{}
+      try{ const {data:replies}=await supaP.from('product_review_replies').select('*').in('review_id', rIds).order('created_at',{ascending:true}); if(replies){ replies.forEach(rp=>{ if(!reviewRepliesCache[rp.review_id]) reviewRepliesCache[rp.review_id]=[]; reviewRepliesCache[rp.review_id].push(rp); }); } }catch{}
+    }
+    const list=document.getElementById('reviewsList'); if(list) list.innerHTML=reviews.map(r=>{ const likes=reviewLikesCache[r.id]||[]; const isLiked=currentUserP&&likes.includes(currentUserP.id); const replies=reviewRepliesCache[r.id]||[]; const isOwner=currentUserP&&r.user_id===currentUserP.id; return `<div class="border-b border-black/5 pb-4 pt-2" id="review-${r.id}"><div class="flex items-center gap-2 flex-wrap"><div class="flex text-[12px]">${renderStars(r.rating)}</div><span class="text-[11px] font-bold">${r.rating}.0</span><span class="text-[11px] text-black/40">${new Date(r.created_at).toLocaleDateString()}</span>${r.is_edited?`<span class="text-[9px] bg-[#FFF7ED] border border-[#FDE68A] px-2 py-0.5 rounded-full font-bold">edited</span>`:''}</div><div class="mt-2"><p class="text-[13px] leading-[1.5] whitespace-pre-wrap" id="comment-${r.id}">${(r.comment||'').replace(/</g,'&lt;')}</p><div id="edit-box-${r.id}" class="hidden mt-2"><textarea id="edit-input-${r.id}" class="w-full border border-black/10 rounded-[10px] p-2 text-[12px] min-h-[60px]">${(r.comment||'').replace(/"/g,'&quot;')}</textarea><div class="flex gap-2 mt-2"><button onclick="saveEditReview('${r.id}')" class="h-8 px-4 rounded-full bg-black text-white text-[11px] font-bold">Save</button><button onclick="cancelEditReview('${r.id}')" class="h-8 px-4 rounded-full border border-black/10 text-[11px] font-bold">Cancel</button></div></div></div><div class="flex items-center gap-3 mt-3 flex-wrap"><button onclick="toggleLikeReview('${r.id}')" class="text-[11px] font-bold flex items-center gap-1 ${isLiked?'text-red-500':'text-black/60'} hover:text-black transition">${isLiked?'❤':'🤍'} Like ${likes.length?`(${likes.length})`:''}</button><button onclick="toggleReplyBoxP('${r.id}')" class="text-[11px] font-bold text-black/60 hover:text-black">↩ Reply ${replies.length?`(${replies.length})`:''}</button>${isOwner?`<button onclick="startEditReview('${r.id}')" class="text-[11px] font-bold text-black/40 hover:text-black">✏ Edit</button><button onclick="deleteReview('${r.id}')" class="text-[11px] font-bold text-red-400 hover:text-red-600">🗑 Delete</button>`:''}</div><div id="replies-${r.id}" class="mt-3 space-y-2">${replies.map(rp=>`<div class="flex gap-2"><div class="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">${(rp.user_name||'A').slice(0,1).toUpperCase()}</div><div class="bg-[#F8F8F8] border border-black/5 rounded-[12px] px-3 py-2 flex-1"><div class="text-[11px] font-bold">${rp.user_name||'User'} <span class="text-[9px] bg-black text-white px-1.5 py-0.5 rounded-full ml-1">reply</span></div><div class="text-[12px] mt-1">${rp.comment}</div><div class="text-[9px] text-black/40 mt-1">${new Date(rp.created_at).toLocaleDateString()}</div></div></div>`).join('')}</div><div id="reply-box-${r.id}" class="hidden mt-3"><div class="flex gap-2"><input id="reply-input-${r.id}" placeholder="Write a reply..." class="flex-1 border border-black/10 rounded-full px-3 py-2 text-[12px] outline-none" /><button onclick="submitReplyP('${r.id}')" class="h-8 px-4 rounded-full bg-black text-white text-[11px] font-bold">Reply</button></div></div></div>`; }).join('')||'<p class="text-[12px] text-black/30">No reviews yet</p>';
+  }catch(e){ console.log('reviews error', e.message); }
+}
+window.toggleLikeReview=async function(reviewId){ if(!currentUserP){ showToastP('Login to like'); return; } try{ const likes=reviewLikesCache[reviewId]||[]; const isLiked=likes.includes(currentUserP.id); if(isLiked){ await supaP.from('product_review_likes').delete().eq('review_id',reviewId).eq('user_id',currentUserP.id); reviewLikesCache[reviewId]=likes.filter(id=>id!==currentUserP.id); } else { await supaP.from('product_review_likes').insert({review_id:reviewId,user_id:currentUserP.id}); if(!reviewLikesCache[reviewId]) reviewLikesCache[reviewId]=[]; reviewLikesCache[reviewId].push(currentUserP.id); } const pid=getProductIdFromUrl(); await loadReviews(pid); showToastP(isLiked?'Unliked':'Liked ❤'); }catch(e){ showToastP('Like failed'); } }
+window.toggleReplyBoxP=function(reviewId){ const box=document.getElementById('reply-box-'+reviewId); if(!box) return; box.classList.toggle('hidden'); if(!box.classList.contains('hidden')) document.getElementById('reply-input-'+reviewId)?.focus(); }
+window.submitReplyP=async function(reviewId){ if(!currentUserP){ showToastP('Login to reply'); return; } const input=document.getElementById('reply-input-'+reviewId); if(!input||!input.value.trim()){ showToastP('Write something'); return; } try{ const userName=currentUserP.email?.split('@')[0]||'User'; await supaP.from('product_review_replies').insert({review_id:reviewId,user_id:currentUserP.id,user_name:userName,comment:input.value.trim()}); showToastP('Reply posted ✓'); input.value=''; const pid=getProductIdFromUrl(); await loadReviews(pid); }catch(e){ showToastP('Reply failed'); } }
+window.startEditReview=function(reviewId){ document.getElementById('comment-'+reviewId)?.classList.add('hidden'); document.getElementById('edit-box-'+reviewId)?.classList.remove('hidden'); }
+window.cancelEditReview=function(reviewId){ document.getElementById('comment-'+reviewId)?.classList.remove('hidden'); document.getElementById('edit-box-'+reviewId)?.classList.add('hidden'); }
+window.saveEditReview=async function(reviewId){ const input=document.getElementById('edit-input-'+reviewId); if(!input) return; const newComment=input.value.trim(); if(!newComment){ showToastP('Cannot be empty'); return; } try{ await supaP.from('product_reviews').update({comment:newComment,is_edited:true,edited_at:new Date().toISOString()}).eq('id',reviewId); showToastP('Edited ✓'); const pid=getProductIdFromUrl(); await loadReviews(pid); }catch(e){ showToastP('Edit failed: '+e.message); } }
+window.deleteReview=async function(reviewId){ if(!confirm('Delete your review?')) return; try{ await supaP.from('product_reviews').delete().eq('id',reviewId); showToastP('Deleted'); const pid=getProductIdFromUrl(); await loadReviews(pid); }catch(e){ showToastP('Delete failed'); } }
+async function loadSimilar(p){
+  const grid=document.getElementById('similarGrid'); if(!grid) return;
+  try{
+    let {data}=await supaP.from('vendor_products').select('*').eq('status','approved').ilike('category',`%${p.category}%`).neq('id',p.id).limit(8);
+    let products=data||[]; if(!products.length){ const kw=(p.title||'').split(' ')[0]; if(kw){ const r=await supaP.from('vendor_products').select('*').eq('status','approved').ilike('title',`%${kw}%`).neq('id',p.id).limit(8); products=r.data||[]; } }
+    if(!products.length){ const {data:tr}=await supaP.from('vendor_products').select('*').eq('status','approved').neq('id',p.id).order('created_at',{ascending:false}).limit(8); products=tr||[]; }
+    if(products.length){ grid.innerHTML=products.map(sp=>`<a href="product.html?id=${sp.id}" class="border rounded-[16px] overflow-hidden bg-white block"><div class="aspect-square bg-[#F5F5F5]"><img src="${(sp.images&&sp.images[0])||''}" class="w-full h-full object-cover"/></div><div class="p-3"><div class="text-[10px] text-black/40 uppercase">${sp.category}</div><div class="font-bold text-[12px] truncate">${sp.title}</div><div class="font-black text-[13px]">GHS ${parseFloat(sp.price).toFixed(2)}</div></div></a>`).join(''); } else { grid.innerHTML=`<div class="col-span-full py-12 text-center bg-white border rounded-[16px]"><p class="font-black">No similar items</p></div>`; }
+  }catch(e){}
+}
+document.getElementById('wishlistBtn')?.addEventListener('click', ()=>{
+  if(!currentProduct) return; let wl=JSON.parse(localStorage.getItem('pb_wishlist')||'[]'); const exists=wl.find(x=>x.id===currentProduct.id); if(exists){ wl=wl.filter(x=>x.id!==currentProduct.id); showToastP('Removed from wishlist'); } else { wl.push(currentProduct); showToastP('Added to wishlist ♥'); } localStorage.setItem('pb_wishlist', JSON.stringify(wl)); updateWishlistCount();
+});
+document.getElementById('addToBagBtn')?.addEventListener('click', ()=>{
+  if(!currentProduct) return; let bag=JSON.parse(localStorage.getItem('pb_bag')||'[]'); const found=bag.find(x=>x.id===currentProduct.id); if(found) found.qty=(found.qty||1)+1; else bag.push({...currentProduct, qty:1}); localStorage.setItem('pb_bag', JSON.stringify(bag)); showToastP('Added to bag'); updateBagCount();
+});
+document.getElementById('buyNowBtn')?.addEventListener('click', ()=>{
+  if(!currentProduct) return; let bag=JSON.parse(localStorage.getItem('pb_bag')||'[]'); const found=bag.find(x=>x.id===currentProduct.id); if(found) found.qty=(found.qty||1)+1; else bag.push({...currentProduct, qty:1}); localStorage.setItem('pb_bag', JSON.stringify(bag)); location.href='data:text/html;base64,PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9IlVURi04Ij48bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLCBpbml0aWFsLXNjYWxlPTEuMCI+Cjx0aXRsZT5DaGVja291dCDigJQgUExVU0ggQkFCRVM8L3RpdGxlPgo8c2NyaXB0IHNyYz0iaHR0cHM6Ly9jZG4uanNkZWxpdnIubmV0L25wbS9Ac3VwYWJhc2Uvc3VwYWJhc2UtanNAMiI+PC9zY3JpcHQ+CjxzdHlsZT4qe2ZvbnQtZmFtaWx5OkludGVyLHNhbnMtc2VyaWY7Ym94LXNpemluZzpib3JkZXItYm94fWJvZHl7YmFja2dyb3VuZDojRkFGOUY3O3BhZGRpbmc6MTZweH1pbnB1dCxzZWxlY3R7d2lkdGg6MTAwJTtwYWRkaW5nOjEwcHg7Ym9yZGVyOjFweCBzb2xpZCAjREREO2JvcmRlci1yYWRpdXM6OHB4O21hcmdpbi10b3A6NHB4fWxhYmVse2ZvbnQtc2l6ZToxMXB4O2ZvbnQtd2VpZ2h0OjcwMDt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7bWFyZ2luLXRvcDoxMnB4O2Rpc3BsYXk6YmxvY2t9IC5jYXJke2JhY2tncm91bmQ6I0ZGRjtib3JkZXI6MXB4IHNvbGlkICNFRUU7Ym9yZGVyLXJhZGl1czoxNnB4O3BhZGRpbmc6MTZweDttYXJnaW4tYm90dG9tOjEycHh9PC9zdHlsZT4KPC9oZWFkPgo8Ym9keT4KPGRpdiBzdHlsZT0ibWF4LXdpZHRoOjYwMHB4O21hcmdpbjowIGF1dG8iPgo8aDIgc3R5bGU9ImZvbnQtd2VpZ2h0OjkwMCI+Q2hlY2tvdXQg4oCiIDxzcGFuIGlkPSJjaXR5TGFiZWwiPkFjY3JhPC9zcGFuPjwvaDI+CjxkaXYgY2xhc3M9ImNhcmQiPgo8bGFiZWw+8J+TjSBTaGlwcGluZyBBZGRyZXNzIChzYXZlZCBmcm9tIFNldHRpbmdzICYgQmFnKTwvbGFiZWw+CjxpbnB1dCBpZD0ic2hpcEFkZHJlc3MiIHBsYWNlaG9sZGVyPSJIb3VzZSBudW1iZXIsIHN0cmVldCIgLz4KPGRpdiBzdHlsZT0iZGlzcGxheTpncmlkO2dyaWQtdGVtcGxhdGUtY29sdW1uczoxZnIgMWZyO2dhcDo4cHg7bWFyZ2luLXRvcDo4cHgiPgo8ZGl2PjxsYWJlbD5DaXR5PC9sYWJlbD48c2VsZWN0IGlkPSJzaGlwQ2l0eSI+PG9wdGlvbj5BY2NyYTwvb3B0aW9uPjxvcHRpb24+VGFtYWxlPC9vcHRpb24+PG9wdGlvbj5LdW1hc2k8L29wdGlvbj48b3B0aW9uPlRlbWE8L29wdGlvbj48b3B0aW9uPlRha29yYWRpPC9vcHRpb24+PG9wdGlvbj5DYXBlIENvYXN0PC9vcHRpb24+PG9wdGlvbj5Lb2ZvcmlkdWE8L29wdGlvbj48b3B0aW9uPkthc29hPC9vcHRpb24+PC9zZWxlY3Q+PC9kaXY+CjxkaXY+PGxhYmVsPlJlZ2lvbjwvbGFiZWw+PHNlbGVjdCBpZD0ic2hpcFJlZ2lvbiI+PG9wdGlvbj5HcmVhdGVyIEFjY3JhPC9vcHRpb24+PG9wdGlvbj5Bc2hhbnRpPC9vcHRpb24+PG9wdGlvbj5Ob3J0aGVybjwvb3B0aW9uPjxvcHRpb24+V2VzdGVybjwvb3B0aW9uPjxvcHRpb24+Q2VudHJhbDwvb3B0aW9uPjxvcHRpb24+RWFzdGVybjwvb3B0aW9uPjxvcHRpb24+Vm9sdGE8L29wdGlvbj48b3B0aW9uPlVwcGVyIEVhc3Q8L29wdGlvbj48b3B0aW9uPlVwcGVyIFdlc3Q8L29wdGlvbj48b3B0aW9uPlNhdmFubmFoPC9vcHRpb24+PC9zZWxlY3Q+PC9kaXY+CjwvZGl2Pgo8bGFiZWw+UGhvbmUgZm9yIGRlbGl2ZXJ5PC9sYWJlbD48aW5wdXQgaWQ9InNoaXBQaG9uZSIgcGxhY2Vob2xkZXI9IisyMzMuLi4iIC8+CjxkaXYgaWQ9InJpc2tXYXJuaW5nIiBzdHlsZT0iZGlzcGxheTpub25lO2JhY2tncm91bmQ6I0ZFRjJGMjtib3JkZXI6MXB4IHNvbGlkICNGRUNBQ0E7Ym9yZGVyLXJhZGl1czo4cHg7cGFkZGluZzoxMHB4O21hcmdpbi10b3A6MTJweDtmb250LXNpemU6MTFweCI+4pqg77iPIFlvdSBoYXZlIGl0ZW1zIGZyb20gc3RvcmVzIG91dHNpZGUgeW91ciByZWdpb24uIERlbGl2ZXJ5IHdpbGwgYmUgR0hTIDk1LTE2NSwgdGFrZXMgMi00IGRheXMsIGFuZCBpcyA8Yj5hdCB5b3VyIG93biByaXNrPC9iPiAobm8gcmV0dXJucyBmb3IgaW50ZXJjaXR5KS48L2Rpdj4KPC9kaXY+CjxkaXYgY2xhc3M9ImNhcmQiIGlkPSJvcmRlclN1bW1hcnkiPjwvZGl2Pgo8YnV0dG9uIGlkPSJwbGFjZU9yZGVyIiBzdHlsZT0id2lkdGg6MTAwJTtwYWRkaW5nOjE0cHg7YmFja2dyb3VuZDojMTExO2NvbG9yOiNGRkY7Ym9yZGVyOm5vbmU7Ym9yZGVyLXJhZGl1czoxMnB4O2ZvbnQtd2VpZ2h0OjgwMDtmb250LXNpemU6MTRweCI+UGxhY2UgT3JkZXIg4oCiIFBheSBvbiBEZWxpdmVyeTwvYnV0dG9uPgo8L2Rpdj4KPHNjcmlwdCBzcmM9ImNoZWNrb3V0LmpzIj48L3NjcmlwdD4KPC9ib2R5Pgo8L2h0bWw+Cg==';
+});
+document.getElementById('shareBtn')?.addEventListener('click', async ()=>{ const url=`${location.origin}${location.pathname}?id=${currentProduct?.id}`; if(navigator.share){ try{ await navigator.share({ title: currentProduct?.title, url }); }catch(e){} } else { await navigator.clipboard.writeText(url); showToastP('Link copied'); } });
+document.getElementById('copyLinkBtn')?.addEventListener('click', async ()=>{ const url=`${location.origin}${location.pathname}?id=${currentProduct?.id}`; await navigator.clipboard.writeText(url); showToastP('Link copied — shareable!'); });
+document.getElementById('writeReviewBtn')?.addEventListener('click', ()=> document.getElementById('reviewForm')?.classList.remove('hidden'));
+document.getElementById('cancelReviewBtn')?.addEventListener('click', ()=> document.getElementById('reviewForm')?.classList.add('hidden'));
+document.getElementById('reviewStarsInput')?.addEventListener('click', (e)=>{ const star=e.target.closest('[data-star]'); if(!star) return; selectedRating=parseInt(star.dataset.star); document.querySelectorAll('#reviewStarsInput [data-star]').forEach(s=>{ s.textContent=parseInt(s.dataset.star)<=selectedRating?'★':'☆'; }); });
+document.getElementById('submitReviewBtn')?.addEventListener('click', async ()=>{ if(!selectedRating){ showToastP('Pick a rating'); return; } const comment=document.getElementById('reviewText')?.value||''; const id=getProductIdFromUrl(); try{ const { data:{session} } = await supaP.auth.getSession(); const userId=session?.user?.id||null; const { error } = await supaP.from('product_reviews').insert({ product_id: id, user_id: userId, rating: selectedRating, comment }); if(error) throw error; showToastP('Review added ★'); document.getElementById('reviewForm')?.classList.add('hidden'); const rt=document.getElementById('reviewText'); if(rt) rt.value=''; selectedRating=0; loadReviews(id); }catch(e){ showToastP('Login to review or try later'); } });
+['suggestDropdown','mobileSuggestDropdown','menuDropdown','mobileHeaderSearch'].forEach(id=>{ document.getElementById(id)?.classList.remove('is-open'); });
+document.getElementById('menuBtn')?.addEventListener('click',()=>{ document.getElementById('suggestDropdown')?.classList.remove('is-open'); document.getElementById('mobileSuggestDropdown')?.classList.remove('is-open'); });
+document.getElementById('searchInput')?.addEventListener('focus',()=>{ document.getElementById('menuDropdown')?.classList.remove('is-open'); });
+document.getElementById('mobileSearchBtn')?.addEventListener('click',()=>{ document.getElementById('menuDropdown')?.classList.remove('is-open'); });
+function updateWishlistCount(){ const wl=JSON.parse(localStorage.getItem('pb_wishlist')||'[]'); const el=document.getElementById('wishlistCount'); if(el){ el.textContent=wl.length; el.classList.toggle('hidden', wl.length===0); } }
+function updateBagCount(){ const bag=JSON.parse(localStorage.getItem('pb_bag')||'[]'); const el=document.getElementById('bagCount'); if(el){ const total=bag.reduce((a,b)=>a+(b.qty||1),0); el.textContent=total; el.classList.toggle('hidden', total===0); } }
+updateWishlistCount(); updateBagCount(); loadProduct();
+</script>
+</body>
+</html>

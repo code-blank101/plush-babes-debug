@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PLUSH BABES — Auth</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="marketplace-auth.css" />
+</head>
+<body>
+<div class="auth-wrapper">
+  <div class="auth-left">
+    <video autoplay muted loop playsinline class="bg-video"><source src="public/images/vid.mp4" type="video/mp4" /></video>
+    <div class="video-overlay"></div>
+    <div class="auth-left-content"><div class="brand">PLUSH BABES</div><div><h1>Curated bags, shoes & beauty. <br/>Delivered in Ghana.</h1><p>Join thousands of women shopping vendors you trust — Groupay together for cheaper delivery.</p><div class="auth-social-proof"><div class="avatars"><span>A</span><span>K</span><span>M</span></div><span style="font-size:11px; color:rgba(255,255,255,0.7);">2,400+ verified shoppers</span></div></div></div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-card" id="signup-page">
+      <h2>Create account</h2><p class="auth-sub">Full name, email, phone — for delivery & MoMo</p>
+      <button id="google-signup-btn" class="btn-google"><img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="" /> Continue with Google</button>
+      <div class="divider"><span>or</span></div>
+      <div class="form-group"><label class="label">Full Name</label><input id="su-name" class="input" placeholder="Hillary Taylor" /></div>
+      <div class="form-row"><div class="form-group"><label class="label">Email</label><input id="su-email" class="input" placeholder="example@email.com" type="email" /></div><div class="form-group"><label class="label">Phone Number</label><input id="su-phone" class="input" placeholder="+233 24 000 0000" type="tel" /></div></div>
+      <div class="form-group"><label class="label">Password</label><div class="password-wrap"><input id="su-password" class="input" type="password" placeholder="••••••••" /><button type="button" class="eye-btn" data-target="su-password"><i data-lucide="eye"></i></button></div><div class="hint">Min 8 chars</div></div>
+      <div class="form-group"><label class="label">Confirm Password</label><div class="password-wrap"><input id="su-confirm" class="input" type="password" placeholder="••••••••" /><button type="button" class="eye-btn" data-target="su-confirm"><i data-lucide="eye"></i></button></div></div>
+      <button id="signup-btn" class="btn-black full">Create account →</button>
+      <div class="auth-switch">Already have an account? <button class="link-btn" id="to-login-btn">Login</button></div>
+      <div id="su-error" class="error hidden"></div>
+    </div>
+    <div class="auth-card hidden" id="login-page">
+      <h2>Welcome back</h2><p class="auth-sub">Login to your Plush Babes account</p>
+      <button id="google-login-btn" class="btn-google"><img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="" /> Continue with Google</button>
+      <div class="divider"><span>or</span></div>
+      <div class="form-group"><label class="label">Email or Phone</label><input id="li-email" class="input" placeholder="ama@email.com" /></div>
+      <div class="form-group"><label class="label">Password</label><div class="password-wrap"><input id="li-password" class="input" type="password" placeholder="••••••••" /><button type="button" class="eye-btn" data-target="li-password"><i data-lucide="eye"></i></button></div></div>
+      <div style="display:flex; justify-content:space-between; margin-top:8px;"><button class="link-btn" id="forgot-link" style="font-size:12px;">Forgot password?</button></div>
+      <button id="login-btn" class="btn-black full" style="margin-top:12px;">Login</button>
+      <div class="auth-switch">Don't have an account? <button class="link-btn" id="to-signup-btn">Signup</button></div>
+      <div id="li-error" class="error hidden"></div>
+    </div>
+    <div class="auth-card hidden" id="verify-page">
+      <h2>Verify email</h2><p class="auth-sub">We sent an <b>8-digit code</b> to <span id="verify-email-display" style="font-weight:600;">your email</span></p>
+      <div class="otp-row"><input maxlength="1" class="otp-input" /><input maxlength="1" class="otp-input" /><input maxlength="1" class="otp-input" /><input maxlength="1" class="otp-input" /><input maxlength="1" class="otp-input" /><input maxlength="1" class="otp-input" /><input maxlength="1" class="otp-input" /><input maxlength="1" class="otp-input" /></div>
+      <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:11px; color:rgba(0,0,0,0.5);"><span id="otp-timer">Resend in 60s</span><button id="resend-btn" class="link-btn" disabled>Resend code</button></div>
+      <button id="verify-btn" class="btn-black full" style="margin-top:16px;">Verify & Continue</button>
+      <div class="auth-switch" style="margin-top:12px;">Wrong email? <button class="link-btn" id="to-signup-from-verify">Go back</button></div>
+      <div id="verify-error" class="error hidden"></div><div id="verify-debug" style="font-size:10px; color:rgba(0,0,0,0.3); margin-top:10px; text-align:center;"></div>
+    </div>
+    <div class="auth-card hidden" id="forgot-page">
+      <h2>Forgot password</h2>
+      <div id="fp-step-email">
+        <div class="form-group"><label class="label">Email</label><input id="fp-email" class="input" placeholder="ama@email.com" type="email" /></div>
+        <button id="fp-send-btn" class="btn-black full">Send code</button>
+      </div>
+      <div id="fp-step-otp" class="hidden" style="margin-top:16px;">
+        <p class="auth-sub">Enter code sent to <span id="fp-email-display" style="font-weight:600;"></span></p>
+        <div class="otp-row"><input maxlength="1" class="otp-input fp-otp" /><input maxlength="1" class="otp-input fp-otp" /><input maxlength="1" class="otp-input fp-otp" /><input maxlength="1" class="otp-input fp-otp" /><input maxlength="1" class="otp-input fp-otp" /><input maxlength="1" class="otp-input fp-otp" /><input maxlength="1" class="otp-input fp-otp" /><input maxlength="1" class="otp-input fp-otp" /></div>
+        <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:11px; color:rgba(0,0,0,0.5);"><span id="fp-otp-timer">Resend in 60s</span><button id="fp-resend-btn" class="link-btn" disabled>Resend code</button></div>
+        <button id="fp-verify-btn" class="btn-black full" style="margin-top:12px;">Verify code</button>
+      </div>
+      <div id="fp-step-newpw" class="hidden" style="margin-top:16px;"><div class="form-group"><label class="label">New Password</label><div class="password-wrap"><input id="fp-newpw" class="input" type="password" placeholder="••••••••" /><button type="button" class="eye-btn" data-target="fp-newpw"><i data-lucide="eye"></i></button></div></div><div class="form-group"><label class="label">Confirm Password</label><div class="password-wrap"><input id="fp-confirmpw" class="input" type="password" placeholder="••••••••" /><button type="button" class="eye-btn" data-target="fp-confirmpw"><i data-lucide="eye"></i></button></div></div><button id="fp-update-btn" class="btn-black full">Update password & go to login</button></div>
+      <div class="auth-switch">Remembered? <button class="link-btn" id="to-login-from-forgot">Back to login</button></div>
+      <div id="fp-error" class="error hidden"></div><div id="fp-debug" style="font-size:10px; color:rgba(0,0,0,0.3); margin-top:10px; text-align:center;"></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">Saved</div>
+<script src="marketplace-auth.js"></script>
+</body>
+</html>

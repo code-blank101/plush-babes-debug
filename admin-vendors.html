@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PLUSH BABES — Admin Control</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <div style="width:36px;height:36px;background:#000;color:#FFF;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:12px">PB</div>
+        <div><div style="font-weight:900;font-size:14px;line-height:1">PLUSH BABES</div><div style="font-size:10px;color:#888;letter-spacing:0.5px">ADMIN CONTROL • GHANA</div></div>
+      </div>
+      <h2 style="font-size:18px;font-weight:900">Admin Login</h2>
+      <p style="font-size:12px;color:#666;margin:6px 0 16px">Use your Supabase admin account. All actions are logged.</p>
+      <input id="admin-email" type="email" placeholder="admin@plushbabes.com" class="auth-input" autocomplete="email" />
+      <div style="position:relative"><input id="admin-pass" type="password" placeholder="Password" class="auth-input" style="padding-right:40px" /><button type="button" id="toggle-pass" style="position:absolute;right:8px;top:8px;background:none;border:none;cursor:pointer">👁️</button></div>
+      <button id="admin-login-btn" class="btn-black w-full" style="height:44px;margin-top:8px">Login to Admin</button>
+      <div id="auth-error" class="auth-error hidden"></div>
+      <div style="margin-top:12px;font-size:10px;color:#999">Tip: Create admin user in Supabase Auth > Users, then login here.</div>
+    </div>
+  </div>
+  <div id="admin-app" class="hidden">
+    <header class="admin-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:32px;height:32px;background:#000;color:#FFF;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:11px">PB</div>
+        <div style="font-weight:900;font-size:13px">PLUSH BABES <span style="font-weight:400;color:#888;margin-left:6px">ADMIN</span> <span style="margin-left:8px;font-size:9px;background:#000;color:#FFF;padding:3px 8px;border-radius:20px">LIVE</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div id="header-pending-count" class="header-stat">0 pending</div>
+        <button id="refresh-btn" class="btn-white small"><i data-lucide="refresh-cw" style="width:14px"></i> Refresh</button>
+        <button id="logout-btn" class="btn-white small">Logout</button>
+      </div>
+    </header>
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <nav class="sidebar-nav" id="sidebar-nav">
+          <button class="nav-item active" data-tab="dashboard"><i data-lucide="layout-dashboard" style="width:16px"></i> Dashboard <span class="count-badge" id="count-dashboard">0</span></button>
+          <button class="nav-item" data-tab="vendors"><i data-lucide="store" style="width:16px"></i> Vendors <span class="count-badge pending" id="count-vendors">0</span></button>
+          <button class="nav-item" data-tab="storefronts"><i data-lucide="layout" style="width:16px"></i> Storefronts <span class="count-badge pending" id="count-storefronts">0</span></button>
+          <button class="nav-item" data-tab="products"><i data-lucide="package" style="width:16px"></i> Products <span class="count-badge pending" id="count-products">0</span></button>
+          <button class="nav-item" data-tab="edits"><i data-lucide="edit-3" style="width:16px"></i> Shop Edits <span class="count-badge pending" id="count-edits">0</span></button>
+          <button class="nav-item" data-tab="reviews"><i data-lucide="star" style="width:16px"></i> Reviews <span class="count-badge" id="count-reviews">0</span></button>
+          <button class="nav-item" data-tab="all"><i data-lucide="users" style="width:16px"></i> All Vendors</button>
+        </nav>
+        <div class="sidebar-footer">
+          <div id="sidebar-user" style="font-size:11px;color:#666;padding:8px;word-break:break-all">admin</div>
+          <div style="font-size:10px;color:#999;padding:0 8px">Supabase: nkrvaaiasyn...</div>
+        </div>
+      </aside>
+      <main class="admin-main">
+        <section id="tab-dashboard" class="tab active">
+          <div class="page-head"><h1>Dashboard</h1><p>Everything that needs approval — vendors, storefronts, products, shop edits, reviews</p></div>
+          <div class="stats-grid" id="dashboard-stats"></div>
+          <div class="two-col">
+            <div class="card"><h3>Recent Vendor Applications <span id="dash-vendor-count" style="font-weight:400;color:#888"></span></h3><div id="dash-recent-vendors"></div></div>
+            <div class="card"><h3>Pending Storefront Edits <span style="font-size:10px;color:#888;font-weight:400">— click to preview on side</span></h3><div id="dash-recent-storefronts"></div></div>
+          </div>
+        </section>
+        <section id="tab-vendors" class="tab">
+          <div class="page-head"><div><h1>Vendor Applications</h1><p>Approve to allow selling, reject with reason</p></div></div>
+          <div class="filter-row">
+            <div class="filter-group" data-filter-group="vendor">
+              <button class="filter-btn active" data-filter="pending">Pending</button>
+              <button class="filter-btn" data-filter="approved">Approved</button>
+              <button class="filter-btn" data-filter="rejected">Rejected</button>
+            </div>
+            <input id="vendor-search" placeholder="Search store, owner, email, city..." class="search-input" />
+          </div>
+          <div id="vendors-list" class="list"></div>
+        </section>
+        <section id="tab-storefronts" class="tab">
+          <div class="page-head"><h1>Storefront Approvals</h1><p>Left: pending edits queue • Right: live preview side panel • Marketplace only shows approved storefronts</p></div>
+          <div class="storefront-layout">
+            <div class="storefront-list-col">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="font-size:13px;font-weight:800">Pending Edits Queue</h3><span id="storefront-queue-count" style="font-size:11px;color:#888">0</span></div>
+              <div id="storefront-queue" class="list"></div>
+              <div style="margin-top:20px"><h3 style="font-size:13px;font-weight:800">Live Storefronts</h3><div id="storefronts-live-list" class="list" style="margin-top:10px"></div></div>
+            </div>
+            <div class="storefront-side-col" id="storefront-side-panel">
+              <div id="storefront-side-empty" style="padding:40px 20px;text-align:center;color:#999">
+                <div style="font-size:30px;margin-bottom:10px">👁️</div>
+                <div style="font-weight:700;font-size:13px;color:#000">Select a pending storefront to preview</div>
+                <div style="font-size:11px;margin-top:6px">Click any card on the left — logo, cover, bio, links will appear here. Approve from here.</div>
+              </div>
+              <div id="storefront-side-content" class="hidden"></div>
+            </div>
+          </div>
+        </section>
+        <section id="tab-products" class="tab">
+          <div class="page-head"><h1>Product Approvals</h1><p>Products are hidden until approved</p></div>
+          <div class="filter-row">
+            <div class="filter-group" data-filter-group="product">
+              <button class="filter-btn active" data-pfilter="pending">Pending</button>
+              <button class="filter-btn" data-pfilter="approved">Approved</button>
+              <button class="filter-btn" data-pfilter="rejected">Rejected</button>
+            </div>
+            <input id="product-search" placeholder="Search title, category..." class="search-input" />
+          </div>
+          <div id="products-list" class="list"></div>
+        </section>
+        <section id="tab-edits" class="tab">
+          <div class="page-head"><h1>Shop Settings Edits</h1><p>Edits to shop name, MoMo, bio, address etc that need approval</p></div>
+          <div id="edits-list" class="list"></div>
+        </section>
+        <section id="tab-reviews" class="tab">
+          <div class="page-head"><h1>Reviews & Replies</h1><p>View-only, delete spam, see likes/replies. Storefront itself is view-only, marketplace users can reply/edit.</p></div>
+          <div class="filter-row">
+            <input id="review-search" placeholder="Search review text, user, product..." class="search-input" />
+            <select id="review-sort" class="search-input" style="min-width:140px"><option value="newest">Newest first</option><option value="oldest">Oldest</option><option value="rating-high">Rating high</option><option value="rating-low">Rating low</option></select>
+          </div>
+          <div id="reviews-list" class="list"></div>
+        </section>
+        <section id="tab-all" class="tab">
+          <div class="page-head"><h1>All Vendors Directory</h1><p>Full list for reference</p></div>
+          <div id="all-vendors-list" class="list"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div id="detail-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header"><h3 id="modal-title">Details</h3><button id="modal-close" class="btn-white small">✕</button></div>
+      <div id="modal-body" class="modal-body"></div>
+      <div id="modal-actions" class="modal-actions"></div>
+    </div>
+  </div>
+  <div id="toast" class="toast hidden"><span id="toast-msg">Saved</span></div>
+  <script src="admin-vendors.js"></script>
+</body>
+</html>
