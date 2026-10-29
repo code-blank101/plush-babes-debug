@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<title>Plush Babes — Header</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+<style>
+  /* ===========================================================
+     FONTS & BASE
+     =========================================================== */
+  body            { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  .font-tagline   { font-family: 'Indie Flower', cursive; }
+
+  .cat-scroll::-webkit-scrollbar { display: none; }
+  .cat-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ===========================================================
+     HEADER — background opacity driven by --bg-opacity (set by JS)
+     =========================================================== */
+  #siteHeader {
+    background-color: rgba(255, 142, 186, var(--bg-opacity, 1)); /* brand pink #FF8EBA */
+    transition: background-color 100ms linear, box-shadow 200ms ease;
+  }
+  #siteHeader.is-scrolled { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+  /* Category row collapses independently of the bar above it */
+  #categoryRow {
+    max-height: 56px;
+    opacity: 1;
+    overflow: hidden;
+    transition: max-height 280ms ease, opacity 200ms ease, padding 280ms ease;
+  }
+  #categoryRow.is-collapsed {
+    max-height: 0px; opacity: 0; padding-top: 0; padding-bottom: 0;
+  }
+
+  /* Left/right scroll controller arrows for the category row.
+     Hidden by default, appear on hover over the row (desktop).
+     "Glassified": translucent + blurred + soft border, and inset
+     slightly from the edge so the circle never gets cropped. */
+  .cat-arrow {
+    opacity: 0;
+    transition: opacity 150ms ease, background 150ms ease;
+  }
+  #categoryWrap:hover .cat-arrow { opacity: 1; }
+  .cat-arrow {
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.35);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  }
+  .cat-arrow:hover { background: rgba(255,255,255,0.32); }
+
+  /* Icon buttons in the header */
+  .icon-btn {
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 9999px; color: white;
+    transition: background 150ms ease, transform 100ms ease;
+  }
+  .icon-btn:hover  { background: rgba(255,255,255,0.15); }
+  .icon-btn:active { transform: scale(0.92); }
+
+  /* Search suggestions dropdown */
+  #suggestDropdown {
+    display: none;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+  }
+  #suggestDropdown.is-open { display: block; }
+
+  /* ===========================================================
+     ACCOUNT / MENU DROPDOWN (from the burger icon)
+     White background, black text, small radius, compact.
+     =========================================================== */
+  #menuDropdown {
+    display: none;
+    width: 220px;
+    background: white;
+    color: black;
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+    border: 1px solid rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+  #menuDropdown.is-open { display: block; }
+  .menu-item {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; text-align: left;
+    padding: 10px 14px;
+    font-size: 13px; font-weight: 500;
+    color: black;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .menu-item:hover { background: #FFF0F6; }
+  .menu-item .menu-icon { flex-shrink: 0; }
+  .menu-item .menu-label { flex: 1; }
+  .menu-item.is-active { background: #FFEAF3; color: #FF3D95; font-weight: 700; border-radius: 10px; }
+  .menu-divider { border-top: 1px solid rgba(0,0,0,0.08); margin: 4px 0; }
+  .unread-badge {
+    background: #FF8EBA;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px; height: 18px;
+    border-radius: 9999px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 5px;
+  }
+  .menu-header-name  { padding: 12px 14px 0; font-weight: 700; font-size: 13px; }
+  .menu-header-email { padding: 2px 14px 10px; font-size: 11px; color: rgba(0,0,0,0.45); }
+  .menu-actions      { padding: 10px 14px 14px; }
+  .menu-btn-primary {
+    display: block; width: 100%; text-align: center;
+    background: black; color: white; font-weight: 700; font-size: 13px;
+    padding: 10px 0; border-radius: 9999px;
+  }
+  .menu-btn-secondary {
+    display: block; width: 100%; text-align: center;
+    background: white; color: black; font-weight: 700; font-size: 13px;
+    padding: 9px 0; border-radius: 9999px; margin-top: 8px;
+    border: 1px solid rgba(0,0,0,0.15);
+  }
+  .menu-helper-text {
+    font-size: 10.5px; color: rgba(0,0,0,0.35);
+    text-align: center; margin-top: 10px; line-height: 1.4;
+  }
+
+  /* ===========================================================
+     "Categories" mega-menu — sits before the scrollable pill row,
+     lists every category vertically so users can jump straight
+     to one (like SHEIN's Categories dropdown).
+     =========================================================== */
+  #categoriesToggle {
+    display: flex; align-items: center; gap: 6px; shrink: 0;
+    color: white; font-size: 13px; font-weight: 700;
+    padding-right: 16px; margin-right: 12px;
+    border-right: 1px solid rgba(255,255,255,0.25);
+    white-space: nowrap;
+  }
+  #categoriesToggle svg { transition: transform 150ms ease; }
+  #categoriesToggle.is-open svg { transform: rotate(180deg); }
+
+  /* ===========================================================
+     SHARED CATEGORIES DROPDOWN PANEL
+     One single panel element, moved between two possible anchor
+     points depending on which toggle opened it: the "Categories ⌄"
+     button (unscrolled) or the ">" button by the logo (scrolled).
+     Same element, same content, always — never two separate copies.
+     =========================================================== */
+  #categoriesDropdownPanel {
+    display: none;
+    position: absolute; top: 100%; left: 0; margin-top: 10px;
+    width: 280px; max-height: 360px; overflow-y: auto;
+    background: white; color: black;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+    border: 1px solid rgba(0,0,0,0.05);
+    z-index: 100;
+    -ms-overflow-style: none; scrollbar-width: none; /* hide scrollbar: Firefox / IE */
+  }
+  #categoriesDropdownPanel::-webkit-scrollbar { display: none; } /* hide scrollbar: Chrome/Safari */
+  #categoriesDropdownPanel.is-open { display: block; }
+
+  /* ===========================================================
+     LOGO-SIDE ">" CATEGORIES DROPDOWN
+     Only appears once the header is scrolled (category pill row
+     is collapsed by then), so there's still a way to browse
+     categories. Card layout matches the reference: image box,
+     category name, "0 ads" subtitle, divider, scrollable list.
+     =========================================================== */
+  #logoCategoriesToggle {
+    display: flex; align-items: center; justify-content: center;
+    width: 0; opacity: 0; pointer-events: none; overflow: hidden;
+    color: white; margin-right: 0;
+    transition: width 200ms ease, opacity 200ms ease, margin-right 200ms ease;
+  }
+  #siteHeader.is-scrolled #logoCategoriesToggle {
+    width: 22px; opacity: 1; pointer-events: auto; margin-right: 8px;
+  }
+  #logoCategoriesToggle svg { transition: transform 150ms ease; }
+  #logoCategoriesToggle.is-open svg { transform: rotate(90deg); }
+
+  .logo-cat-item {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    transition: background 120ms ease;
+  }
+  .logo-cat-item:last-child { border-bottom: none; }
+  .logo-cat-item:hover { background: #FFF7FA; }
+  .logo-cat-item.is-active .logo-cat-name { color: #FF3D95; }
+
+  /* Placeholder image box — swap for a real <img> per category via
+     CATEGORY_IMAGES in the script below once you have the transparent
+     PNGs ready. Left gray/dashed on purpose as a clear placeholder. */
+  .logo-cat-imgbox {
+    width: 44px; height: 44px; flex-shrink: 0;
+    border-radius: 12px;
+    border: 1.5px dashed rgba(0,0,0,0.18);
+    background: #F2F2F2;
+    color: rgba(0,0,0,0.35);
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-cat-img { width: 44px; height: 44px; object-fit: contain; flex-shrink: 0; }
+
+  .logo-cat-name { display: block; font-weight: 700; font-size: 14px; color: black; }
+  .logo-cat-ads  { display: block; font-size: 12px; color: rgba(0,0,0,0.45); margin-top: 2px; }
+
+  /* Sticky "scroll to see more" hint at the bottom of the list */
+  .logo-cat-scrollhint {
+    position: sticky; bottom: 0;
+    background: linear-gradient(to top, white 55%, transparent);
+    text-align: center; font-size: 11px; font-weight: 600;
+    color: rgba(0,0,0,0.4);
+    padding: 16px 0 10px;
+    pointer-events: none;
+  }
+
+  /* Blinking caret for the typing placeholder animation */
+  .typing-caret {
+    display: inline-block;
+    width: 1px;
+    background: currentColor;
+    animation: caretBlink 900ms steps(1) infinite;
+  }
+  @keyframes caretBlink { 50% { opacity: 0; } }
+</style>
+</head>
+<body class="bg-[#FFFBFD]">
+
+<header id="siteHeader" class="sticky top-0 z-50">
+  <div class="max-w-[1280px] mx-auto px-4">
+
+    <!-- Main bar: logo, search, icons -->
+    <div class="h-[68px] flex items-center justify-between gap-4">
+
+      <div class="flex items-center shrink-0">
+        <!-- Appears only once scrolled (category pill row is collapsed by then).
+             Own relative wrapper = its own anchor point for the shared dropdown panel. -->
+        <div id="logoCategoriesAnchor" class="relative">
+          <button id="logoCategoriesToggle" aria-label="Browse categories">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+        <button id="logoTextBtn" class="flex flex-col leading-none text-left" aria-label="Back to home">
+          <span class="font-black tracking-tight text-white text-[20px]">PLUSH BABES</span>
+          <span class="font-tagline text-white/90 text-[12px] mt-[1px]">where the girlies shop</span>
+        </button>
+      </div>
+
+      <!-- Search (desktop) -->
+      <div class="hidden md:block flex-1 max-w-[420px] relative">
+        <div class="w-full h-[38px] bg-white rounded-full flex items-center px-4 gap-2">
+          <input
+            id="searchInput"
+            placeholder="Search"
+            autocomplete="off"
+            class="bg-transparent outline-none text-[13px] w-full placeholder:text-black/40"
+          />
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2" class="opacity-50 shrink-0">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+        </div>
+
+        <!-- Suggestions dropdown — opens on focus/click, matches your screenshot -->
+        <div id="suggestDropdown" class="absolute top-[46px] left-0 w-full bg-white rounded-[16px] border border-black/5 overflow-hidden z-[100]">
+          <div class="p-2">
+            <p class="text-[10px] font-bold tracking-widest text-black/40 px-3 py-2">SUGGESTIONS</p>
+            <div id="suggestList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Icons -->
+      <div class="flex items-center gap-1">
+        <a href="wishlist.html" class="icon-btn" aria-label="Wishlist">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </a>
+        <a href="bag.html" class="icon-btn relative" aria-label="Bag">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 7h12l-1 12H7L6 7z"/><path d="M9 7V5a3 3 0 016 0v2"/></svg>
+          <span id="bagCount" class="absolute -top-1 -right-1 bg-white text-black text-[8px] w-[14px] h-[14px] rounded-full flex items-center justify-center font-bold leading-none border border-black/10">0</span>
+        </a>
+        <a href="account.html#overview" class="icon-btn hidden sm:flex" aria-label="Account">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>
+        </a>
+
+        <!-- Menu button + account dropdown -->
+        <div class="relative">
+          <button id="menuBtn" class="icon-btn" aria-label="Menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+          <div id="menuDropdown" class="absolute right-0 top-[46px] z-[100]">
+            <!-- Content is rendered by JS (section 7 below) so it can react to login state -->
+            <div id="menuContent"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category row — collapses on scroll -->
+    <div id="categoryRow" class="pb-2">
+      <div class="flex items-center">
+
+        <!-- "Categories" toggle — fixed at the left, not part of the scrolling row.
+             Shares the same dropdown panel as the ">" toggle by the logo (see below). -->
+        <div id="categoriesAnchor" class="relative shrink-0">
+          <button id="categoriesToggle">
+            Categories
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <!-- The one shared dropdown panel lives here by default; JS moves it
+               to #logoCategoriesAnchor when opened from the ">" toggle instead. -->
+          <div id="categoriesDropdownPanel"></div>
+        </div>
+
+        <!-- Scrollable pill row + its own left/right controller arrows -->
+        <div id="categoryWrap" class="relative flex-1 min-w-0 py-2">
+          <button id="catLeft" class="cat-arrow hidden md:flex absolute left-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full items-center justify-center text-white">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <button id="catRight" class="cat-arrow hidden md:flex absolute right-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full items-center justify-center text-white">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+          <div id="categoryScroll" class="cat-scroll flex items-center gap-6 overflow-x-auto whitespace-nowrap md:px-10"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</header>
+
+<script>
+/* =====================================================================
+   1) DATA
+   Your full category list and the search suggestions/typing words,
+   pulled from your original prototype. Edit these to change content —
+   nothing else needs to change.
+   ===================================================================== */
+const CATEGORIES = [
+  "Women clothing", "Kids & Baby", "Beauty", "Shoes", "Bags & Luggage",
+  "Jewelry & Accessories", "Home & Living", "Electronics",
+  "Phones & Accessories", "Sports & Fitness", "Health & Personal Care",
+  "Toys & Games", "Stationery & School", "Pet Supplies", "Automotive",
+  "Travel", "Party & Events", "Wedding", "Groceries & Food", "Tools & DIY",
+  "Outdoor & Garden", "Office Supplies", "Furniture", "New Arrivals",
+  "Trending", "Best Sellers", "Flash Sale", "Kitchen essentials",
+  "Room decoration items"
+];
+
+const SUGGESTIONS = [
+  "Nails acrylic set", "Bags mini croc", "Shoes chunky heels",
+  "Wigs frontal lace", "Kids matching set", "Curve bodycon dress",
+  "Beachwear crochet coverup", "Dresses satin slip", "Jackets puffer"
+];
+
+// One-word recommendations the placeholder types out, e.g. "Search Nails"
+const TYPING_WORDS = ["Nails", "Bags", "Shoes", "Wigs", "Kids", "Curve", "Beachwear"];
+
+// Drop your real transparent PNGs in here, keyed by the exact category
+// name from CATEGORIES above. Anything not listed falls back to the
+// gray "IMG" placeholder box automatically — nothing else to change.
+const CATEGORY_IMAGES = {
+  // "Women clothing": "images/categories/women-clothing.png",
+  // "Kids & Baby":     "images/categories/kids-baby.png",
+  // ...add one line per category as your images are ready
+};
+
+function categoryImageMarkup(cat) {
+  const src = CATEGORY_IMAGES[cat];
+  return src
+    ? `<img src="${src}" alt="${cat}" class="logo-cat-img" />`
+    : `<span class="logo-cat-imgbox">IMG</span>`;
+}
+
+// Shared row/list markup used by BOTH category dropdowns (the
+// "Categories ⌄" one in the header bar, and the ">" one that appears
+// by the logo once scrolled) — so they always look and behave
+// identically. `activeCategory` is declared in section 2 below; this
+// function is only ever called after that's run, so it's safe to
+// reference here.
+function buildCategoryCardList() {
+  const rows = CATEGORIES.map(cat => `
+    <button data-category="${cat}" class="logo-cat-item ${cat === activeCategory ? 'is-active' : ''}">
+      ${categoryImageMarkup(cat)}
+      <span>
+        <span class="logo-cat-name">${cat}</span>
+        <span class="logo-cat-ads">0 ads</span>
+      </span>
+    </button>
+  `).join('');
+
+  return rows + `<div class="logo-cat-scrollhint">Scroll to see more ⌄</div>`;
+}
+
+
+/* =====================================================================
+   2) RENDER CATEGORIES (pill row)
+   ===================================================================== */
+const categoryScrollEl = document.getElementById('categoryScroll');
+let activeCategory = null;
+
+function renderCategories() {
+  categoryScrollEl.innerHTML = CATEGORIES.map(cat => `
+    <button data-category="${cat}"
+      class="category-pill shrink-0 text-[13px] font-medium text-white/90 hover:text-white transition-colors"
+    >${cat}</button>
+  `).join('');
+}
+renderCategories();
+
+// Shared by the pill row, the Categories mega menu, AND the logo-side
+// dropdown — so picking a category anywhere stays in sync everywhere.
+// Clicking the SAME category again clears the filter (toggle off).
+function selectCategory(cat) {
+  if (activeCategory === cat) {
+    activeCategory = null;
+    categoryFilterActive = false;
+    // typing animation resumes on its own next tick — see section 5
+  } else {
+    activeCategory = cat;
+    categoryFilterActive = true;
+    searchInput.placeholder = `Search in ${cat}`;
+  }
+
+  document.querySelectorAll('.category-pill').forEach(el => {
+    el.classList.toggle('font-bold', el.dataset.category === activeCategory);
+    el.classList.toggle('underline', el.dataset.category === activeCategory);
+  });
+  // Covers items in BOTH dropdowns — they share this class now.
+  document.querySelectorAll('.logo-cat-item').forEach(el => {
+    el.classList.toggle('is-active', el.dataset.category === activeCategory);
+  });
+
+  closeCategoriesDropdown();
+  // Hook up real filtering later: filterProductsByCategory(activeCategory)
+}
+
+// Clicking the text logo = "go back to the main screen": clears any
+// selected category (search placeholder resumes its typing animation
+// on its own next tick), clears typed search text, closes any open
+// dropdowns, and scrolls back to the top.
+const logoTextBtn = document.getElementById('logoTextBtn');
+function resetToHome() {
+  if (activeCategory) selectCategory(activeCategory); // toggles it off via existing logic
+  searchInput.value = '';
+  closeSuggestions();
+  closeMenu();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Hook up real navigation later, e.g.: window.location.href = '/'
+}
+logoTextBtn.addEventListener('click', resetToHome);
+
+categoryScrollEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-category]');
+  if (!btn) return;
+  selectCategory(btn.dataset.category);
+});
+
+
+/* =====================================================================
+   3) CATEGORY ROW CONTROLLER (left/right scroll arrows)
+   ===================================================================== */
+const catLeftBtn  = document.getElementById('catLeft');
+const catRightBtn = document.getElementById('catRight');
+
+function scrollCategories(direction) {
+  categoryScrollEl.scrollBy({ left: direction * 300, behavior: 'smooth' });
+}
+catLeftBtn.addEventListener('click', () => scrollCategories(-1));
+catRightBtn.addEventListener('click', () => scrollCategories(1));
+
+
+/* =====================================================================
+   3b) SHARED CATEGORIES DROPDOWN
+   ONE panel element (#categoriesDropdownPanel), toggled from either the
+   "Categories ⌄" button (always visible) or the ">" button by the logo
+   (only visible once scrolled). Whichever one is clicked, the panel is
+   physically moved (via appendChild) into that button's anchor wrapper
+   before opening — so it's always the literal same element/content,
+   never two separate copies that could drift out of sync.
+   ===================================================================== */
+const categoriesToggleBtn    = document.getElementById('categoriesToggle');
+const categoriesAnchor       = document.getElementById('categoriesAnchor');
+const logoCategoriesToggleBtn = document.getElementById('logoCategoriesToggle');
+const logoCategoriesAnchor    = document.getElementById('logoCategoriesAnchor');
+const categoriesDropdownPanel = document.getElementById('categoriesDropdownPanel');
+
+function renderCategoriesDropdownPanel() {
+  categoriesDropdownPanel.innerHTML = buildCategoryCardList();
+}
+renderCategoriesDropdownPanel();
+
+function openCategoriesDropdown(anchorEl, toggleBtn) {
+  anchorEl.appendChild(categoriesDropdownPanel); // move the one panel to this anchor
+  categoriesDropdownPanel.classList.add('is-open');
+  categoriesToggleBtn.classList.toggle('is-open', toggleBtn === categoriesToggleBtn);
+  logoCategoriesToggleBtn.classList.toggle('is-open', toggleBtn === logoCategoriesToggleBtn);
+
+  // #categoryRow uses overflow:hidden to animate its collapse-on-scroll —
+  // which also clips anything absolutely positioned inside it, including
+  // this panel when it's anchored to the "Categories ⌄" button. Relax
+  // that only while the panel is open there; onScroll() below closes the
+  // panel (and this reverts) the moment the row actually starts collapsing.
+  if (anchorEl === categoriesAnchor) categoryRowEl.style.overflow = 'visible';
+}
+function closeCategoriesDropdown() {
+  categoriesDropdownPanel.classList.remove('is-open');
+  categoriesToggleBtn.classList.remove('is-open');
+  logoCategoriesToggleBtn.classList.remove('is-open');
+  categoryRowEl.style.overflow = ''; // back to the default (hidden) from CSS
+}
+function isCategoriesDropdownOpenFor(anchorEl) {
+  return categoriesDropdownPanel.classList.contains('is-open') && categoriesDropdownPanel.parentElement === anchorEl;
+}
+
+categoriesToggleBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  isCategoriesDropdownOpenFor(categoriesAnchor)
+    ? closeCategoriesDropdown()
+    : openCategoriesDropdown(categoriesAnchor, categoriesToggleBtn);
+});
+
+logoCategoriesToggleBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  isCategoriesDropdownOpenFor(logoCategoriesAnchor)
+    ? closeCategoriesDropdown()
+    : openCategoriesDropdown(logoCategoriesAnchor, logoCategoriesToggleBtn);
+});
+
+categoriesDropdownPanel.addEventListener('click', (e) => {
+  const item = e.target.closest('[data-category]');
+  if (!item) return;
+  selectCategory(item.dataset.category); // also closes the panel
+  renderCategoriesDropdownPanel(); // refresh so the new is-active row shows
+});
+
+document.addEventListener('click', (e) => {
+  const clickedInsidePanel = categoriesDropdownPanel.contains(e.target);
+  const clickedAToggle = e.target === categoriesToggleBtn || e.target === logoCategoriesToggleBtn
+    || categoriesToggleBtn.contains(e.target) || logoCategoriesToggleBtn.contains(e.target);
+  if (!clickedInsidePanel && !clickedAToggle) closeCategoriesDropdown();
+});
+
+
+/* =====================================================================
+   4) SEARCH SUGGESTIONS DROPDOWN
+   Opens when the search input is focused/clicked, matching the
+   dropdown in your screenshot. Closes on blur (with a short delay so
+   a click on a suggestion registers first) or on outside click.
+   ===================================================================== */
+const searchInput    = document.getElementById('searchInput');
+const suggestDropdown = document.getElementById('suggestDropdown');
+const suggestListEl   = document.getElementById('suggestList');
+
+function renderSuggestions() {
+  suggestListEl.innerHTML = SUGGESTIONS.map(term => `
+    <button data-term="${term}"
+      class="suggest-item w-full text-left px-3 py-[10px] text-[13px] hover:bg-[#FFF0F6] rounded-[10px] flex items-center gap-3 transition-colors"
+    >
+      <span class="w-6 h-6 rounded-full bg-[#F5F5F5] flex items-center justify-center shrink-0">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </span>
+      ${term}
+    </button>
+  `).join('');
+}
+renderSuggestions();
+
+function openSuggestions()  { suggestDropdown.classList.add('is-open'); }
+function closeSuggestions() { suggestDropdown.classList.remove('is-open'); }
+
+searchInput.addEventListener('focus', openSuggestions);
+searchInput.addEventListener('click', openSuggestions);
+searchInput.addEventListener('blur', () => setTimeout(closeSuggestions, 150)); // delay lets a click register
+
+suggestListEl.addEventListener('mousedown', (e) => {
+  // mousedown (not click) fires before the input's blur event
+  const item = e.target.closest('[data-term]');
+  if (!item) return;
+  searchInput.value = item.dataset.term;
+  closeSuggestions();
+  // Hook up real search later: runSearch(item.dataset.term)
+});
+
+
+/* =====================================================================
+   5) TYPING PLACEHOLDER ANIMATION
+   Cycles the input's placeholder through "Search <word>", typing and
+   deleting one letter at a time — same effect as your original.
+   ===================================================================== */
+let wordIndex  = 0;
+let charIndex  = 0;
+let isDeleting = false;
+let categoryFilterActive = false; // true while "Search in {category}" is showing
+
+const TYPE_SPEED   = 110; // ms per letter while typing
+const DELETE_SPEED = 45;  // ms per letter while deleting
+const HOLD_TIME     = 1200; // pause once a word is fully typed
+
+function tickTypingAnimation() {
+  // While a category is selected, leave "Search in {category}" alone —
+  // just keep the loop alive so it resumes smoothly once cleared.
+  if (categoryFilterActive) {
+    setTimeout(tickTypingAnimation, TYPE_SPEED);
+    return;
+  }
+
+  const word = TYPING_WORDS[wordIndex];
+
+  if (!isDeleting) {
+    charIndex++;
+    searchInput.placeholder = 'Search ' + word.slice(0, charIndex);
+    if (charIndex === word.length) {
+      setTimeout(() => { isDeleting = true; tickTypingAnimation(); }, HOLD_TIME);
+      return;
+    }
+  } else {
+    charIndex--;
+    searchInput.placeholder = 'Search ' + word.slice(0, charIndex);
+    if (charIndex === 0) {
+      isDeleting = false;
+      wordIndex = (wordIndex + 1) % TYPING_WORDS.length;
+    }
+  }
+
+  setTimeout(tickTypingAnimation, isDeleting ? DELETE_SPEED : TYPE_SPEED);
+}
+tickTypingAnimation();
+
+
+/* =====================================================================
+   6) ACCOUNT / MENU DROPDOWN (burger icon)
+   Logged in: "Hi, {name}" + email, then icon menu items (My Account,
+   Orders, Inbox, Wishlist — current page highlighted), then Logout.
+   Logged out: same icon menu items (no highlight), then Login +
+   Create Account buttons and a short helper line.
+   Swap isLoggedIn / userName / userEmail / unreadCount / currentPage
+   for real auth + inbox + routing data later.
+   ===================================================================== */
+let isLoggedIn   = true;      // demo starting state
+let userName     = "Ama";
+let userEmail    = "ama@plush.com";
+let unreadCount  = 0;         // 0 = no badge shown; set >0 to show the pink unread circle
+
+// Icons used in the menu — kept as small named constants so the
+// markup below stays readable.
+const ICON_ACCOUNT = `<svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>`;
+const ICON_ORDERS   = `<svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>`;
+const ICON_INBOX    = `<svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>`;
+const ICON_WISHLIST = `<svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
+const ICON_LOGOUT   = `<svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>`;
+
+const menuBtn      = document.getElementById('menuBtn');
+const menuDropdown = document.getElementById('menuDropdown');
+const menuContent  = document.getElementById('menuContent');
+
+// The four items every state shows — page + icon + label are paired here
+// so logged-in and logged-out rendering both pull from one list.
+const MENU_LINKS = [
+  { page: 'account',  icon: ICON_ACCOUNT,  label: 'My Account' },
+  { page: 'orders',   icon: ICON_ORDERS,   label: 'Orders' },
+  { page: 'inbox',    icon: ICON_INBOX,    label: 'Inbox' },
+  { page: 'wishlist', icon: ICON_WISHLIST, label: 'Wishlist' },
+];
+
+function renderMenuLinks() {
+  return MENU_LINKS.map(({ page, icon, label }) => `
+    <button class="menu-item" data-action="${page}">
+      ${icon}
+      <span class="menu-label">${label}</span>
+      ${page === 'inbox' && unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : ''}
+    </button>
+  `).join('');
+}
+
+function renderMenu() {
+  if (isLoggedIn) {
+    menuContent.innerHTML = `
+      <div class="menu-header-name">Hi, ${userName}</div>
+      <div class="menu-header-email">${userEmail}</div>
+      <div class="menu-divider"></div>
+      ${renderMenuLinks()}
+      <div class="menu-divider"></div>
+      <button class="menu-item" data-action="auth">${ICON_LOGOUT}<span class="menu-label">Logout</span></button>
+    `;
+  } else {
+    menuContent.innerHTML = `
+      ${renderMenuLinks()}
+      <div class="menu-divider"></div>
+      <div class="menu-actions">
+        <button class="menu-btn-primary" data-action="auth">Login</button>
+        <button class="menu-btn-secondary" data-action="create-account">Create Account</button>
+        <p class="menu-helper-text">Create an account to save your wishlist &amp; track orders</p>
+      </div>
+    `;
+  }
+}
+renderMenu();
+
+function toggleMenu()  { menuDropdown.classList.toggle('is-open'); }
+function closeMenu()   { menuDropdown.classList.remove('is-open'); }
+
+menuBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
+
+document.addEventListener('click', (e) => {
+  if (!menuDropdown.contains(e.target) && e.target !== menuBtn) closeMenu();
+});
+
+menuContent.addEventListener('click', (e) => {
+  const item = e.target.closest('[data-action]');
+  if (!item) return;
+  const action = item.dataset.action;
+
+  if (action === 'auth') {
+    isLoggedIn = !isLoggedIn;
+    renderMenu();
+    return; // keep menu open so you can see the state change
+  }
+  // Hook up real navigation later, e.g.:
+  // if (action === 'account') window.location.href = '/account';
+  closeMenu();
+});
+
+// Demo-only: lets you preview both logged-in and logged-out states.
+// Delete this block (and the button in the HTML) once wired to real auth.
+document.getElementById('demoLoginToggle').addEventListener('click', () => {
+  isLoggedIn = !isLoggedIn;
+  renderMenu();
+});
+
+
+/* =====================================================================
+   7) SCROLL BEHAVIOR — categories collapse + header fades
+   ===================================================================== */
+const headerEl      = document.getElementById('siteHeader');
+const categoryRowEl = document.getElementById('categoryRow');
+
+const COLLAPSE_AT   = 60;
+const FADE_DISTANCE = 350;
+const MIN_OPACITY   = 0.35;
+
+function onScroll() {
+  const scrollY = window.scrollY || window.pageYOffset;
+
+  const shouldCollapse = scrollY > COLLAPSE_AT;
+  if (shouldCollapse && isCategoriesDropdownOpenFor(categoriesAnchor)) closeCategoriesDropdown();
+  categoryRowEl.classList.toggle('is-collapsed', shouldCollapse);
+
+  const progress = Math.min(scrollY / FADE_DISTANCE, 1);
+  const opacity  = 1 - progress * (1 - MIN_OPACITY);
+  headerEl.style.setProperty('--bg-opacity', opacity.toFixed(3));
+
+  headerEl.classList.toggle('is-scrolled', scrollY > 4);
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+</script>
+
+</body>
+</html>

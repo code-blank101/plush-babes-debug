@@ -1,0 +1,260 @@
+<style>
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    background: #F0F0F0;
+  }
+  .skeleton-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: shimmer 1.5s infinite;
+  }
+  .skeleton-card {
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 18px;
+    background: white;
+    overflow: hidden;
+  }
+</style>
+<!-- components/product-grid.html - ALL 31 CATEGORIES COMPLETE, TOGGLE FIXED -->
+<section class="w-[98%] md:w-[92%] mx-auto mt-4 bg-white rounded-[20px] px-3 md:px-6 py-5 md:py-7">
+  <h2 class="font-medium text-[11px] md:text-[12px] text-[#8A8A8A] tracking-[0.2em] mb-5 text-center uppercase">~ Search by category ~</h2>
+  <div id="bubbleContainer" class="relative max-h-[400px] overflow-hidden transition-all duration-500 ease-in-out">
+    <div id="categoryBubbleGrid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-8 gap-x-3 gap-y-6 md:gap-x-6 md:gap-y-8">
+      <button data-category="Women clothing" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/nightwear.png" alt="Women clothing" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>WO</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Women clothing</span>
+      </button>
+      <button data-category="Kids & Baby" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/Kids & Baby.png" alt="Kids & Baby" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>KI</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Kids &<br>Baby</span>
+      </button>
+      <button data-category="Beauty" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/knitwear.png" alt="Beauty" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>BE</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Beauty</span>
+      </button>
+      <button data-category="Shoes" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/shoes.png" alt="Shoes" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>SH</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Shoes</span>
+      </button>
+      <button data-category="Bags & Luggage" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/bags.png" alt="Bags & Luggage" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>BA</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Bags &<br>Luggage</span>
+      </button>
+      <button data-category="Jewelry & Accessories" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/jewelry.png" alt="Jewelry & Accessories" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>JE</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Jewelry &<br>Accessories</span>
+      </button>
+      <button data-category="Home & Living" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/home & living.png" alt="Home & Living" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>HO</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Home &<br>Living</span>
+      </button>
+      <button data-category="Electronics" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#FFE4EF] border border-[#FF8EBA]/20 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
+          <span class="font-black text-[14px] text-[#FF4D9A]">E</span>
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Electronics</span>
+      </button>
+      <button data-category="Phones & Accessories" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/phones & accessories.png" alt="Phones & Accessories" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>PH</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Phones &<br>Accessories</span>
+      </button>
+      <button data-category="Sports & Fitness" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/sports & fitness.png" alt="Sports & Fitness" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>SP</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Sports &<br>Fitness</span>
+      </button>
+      <button data-category="Health & Personal Care" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#FFE4EF] border border-[#FF8EBA]/20 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
+          <span class="font-black text-[14px] text-[#FF4D9A]">H</span>
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Health &<br>Personal Care</span>
+      </button>
+      <button data-category="Toys & Games" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/toys & games.png" alt="Toys & Games" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>TO</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Toys &<br>Games</span>
+      </button>
+      <button data-category="Stationery & School" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/stationrey & school.png" alt="Stationery & School" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>ST</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Stationery &<br>School</span>
+      </button>
+      <button data-category="Pet Supplies" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/pet supplies.png" alt="Pet Supplies" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>PE</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Pet Supplies</span>
+      </button>
+      <button data-category="Automotive" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#FFE4EF] border border-[#FF8EBA]/20 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
+          <span class="font-black text-[14px] text-[#FF4D9A]">A</span>
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Automotive</span>
+      </button>
+      <button data-category="Travel" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#FFE4EF] border border-[#FF8EBA]/20 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
+          <span class="font-black text-[14px] text-[#FF4D9A]">T</span>
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Travel</span>
+      </button>
+      <button data-category="Party & Events" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#FFE4EF] border border-[#FF8EBA]/20 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
+          <span class="font-black text-[14px] text-[#FF4D9A]">P</span>
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Party &<br>Events</span>
+      </button>
+      <button data-category="Wedding" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#FFE4EF] border border-[#FF8EBA]/20 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
+          <span class="font-black text-[14px] text-[#FF4D9A]">W</span>
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Wedding</span>
+      </button>
+      <button data-category="Groceries & Food" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#FFE4EF] border border-[#FF8EBA]/20 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
+          <span class="font-black text-[14px] text-[#FF4D9A]">G</span>
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Groceries &<br>Food</span>
+      </button>
+      <button data-category="Tools & DIY" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/tools & diy.png" alt="Tools & DIY" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>TO</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Tools &<br>DIY</span>
+      </button>
+      <button data-category="Outdoor & Garden" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/outdoor & gadern.png" alt="Outdoor & Garden" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>OU</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Outdoor &<br>Garden</span>
+      </button>
+      <button data-category="Office Supplies" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/office supplies.png" alt="Office Supplies" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>OF</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Office Supplies</span>
+      </button>
+      <button data-category="Furniture" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/furniture.png" alt="Furniture" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>FU</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Furniture</span>
+      </button>
+      <button data-category="New Arrivals" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#FFE4EF] border border-[#FF8EBA]/20 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
+          <span class="font-black text-[14px] text-[#FF4D9A]">N</span>
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">New Arrivals</span>
+      </button>
+      <button data-category="Trending" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#FFE4EF] border border-[#FF8EBA]/20 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
+          <span class="font-black text-[14px] text-[#FF4D9A]">T</span>
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Trending</span>
+      </button>
+      <button data-category="Best Sellers" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#FFE4EF] border border-[#FF8EBA]/20 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
+          <span class="font-black text-[14px] text-[#FF4D9A]">B</span>
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Best Sellers</span>
+      </button>
+      <button data-category="Flash Sale" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#FFE4EF] border border-[#FF8EBA]/20 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
+          <span class="font-black text-[14px] text-[#FF4D9A]">F</span>
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Flash Sale</span>
+      </button>
+      <button data-category="Kitchen essentials" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/kitchen essentials.png" alt="Kitchen essentials" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>KI</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Kitchen essentials</span>
+      </button>
+      <button data-category="Room decoration items" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/room decoration items.png" alt="Room decoration items" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>RO</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Room decoration items</span>
+      </button>
+      <button data-category="Beauty Appliances" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/beauty appliances.png" alt="Beauty Appliances" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>BE</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Beauty Appliances</span>
+      </button>
+      <button data-category="Gifts" class="cat-bubble flex flex-col items-center gap-2 group">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#F5F5F5] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform ring-0 group-[.is-active]:ring-2 group-[.is-active]:ring-black">
+          <img src="components/categories/gifts.png" alt="Gifts" class="w-full h-full object-contain p-2.5" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-[10px] font-black\'>GI</span>'" />
+        </div>
+        <span class="text-[11px] md:text-[12px] font-medium leading-tight text-center max-w-[80px]">Gifts</span>
+      </button>
+    </div>
+    <div id="bubbleFade" class="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent transition-opacity duration-300"></div>
+  </div>
+  <div class="flex justify-center mt-6">
+    <button id="toggleBubblesBtn" class="h-10 px-6 rounded-full bg-[#111] text-white text-[12px] font-bold tracking-wide flex items-center gap-2 hover:bg-black transition-colors">
+      <span id="toggleBubblesLabel">View All Categories (31)</span>
+      <svg id="toggleBubblesIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+  </div>
+</section>
+<section class="max-w-[1280px] mx-auto px-4 py-6 md:py-10">
+  <div class="flex flex-col items-center text-center mb-4 md:mb-6">
+    <h2 class="font-medium text-[11px] md:text-[12px] text-[#8A8A8A] tracking-[0.2em] uppercase">- Shop Plush -</h2>
+  </div>
+  <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 hidden"></div>
+  <div id="productGridSkeleton" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+    <!-- 8 skeleton cards -->
+    <div class="skeleton-card"><div class="skeleton-shimmer aspect-[4/5] w-full"></div><div class="p-3.5 space-y-2.5"><div class="flex justify-between"><div class="h-2.5 w-16 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-10 bg-[#F0F0F0] rounded-full"></div></div><div class="h-3.5 w-full bg-[#F0F0F0] rounded-full"></div><div class="h-3.5 w-3/4 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-1/2 bg-[#F0F0F0] rounded-full"></div><div class="flex justify-between items-center pt-1"><div class="h-4 w-20 bg-[#F0F0F0] rounded-full"></div><div class="h-3 w-16 bg-[#F0F0F0] rounded-full"></div></div><div class="grid grid-cols-[1fr_38px] gap-2 pt-2"><div class="h-9 bg-[#F0F0F0] rounded-full"></div><div class="h-9 w-9 bg-[#F0F0F0] rounded-full"></div></div></div></div>
+    <div class="skeleton-card"><div class="skeleton-shimmer aspect-[4/5] w-full"></div><div class="p-3.5 space-y-2.5"><div class="flex justify-between"><div class="h-2.5 w-16 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-10 bg-[#F0F0F0] rounded-full"></div></div><div class="h-3.5 w-full bg-[#F0F0F0] rounded-full"></div><div class="h-3.5 w-3/4 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-1/2 bg-[#F0F0F0] rounded-full"></div><div class="flex justify-between items-center pt-1"><div class="h-4 w-20 bg-[#F0F0F0] rounded-full"></div><div class="h-3 w-16 bg-[#F0F0F0] rounded-full"></div></div><div class="grid grid-cols-[1fr_38px] gap-2 pt-2"><div class="h-9 bg-[#F0F0F0] rounded-full"></div><div class="h-9 w-9 bg-[#F0F0F0] rounded-full"></div></div></div></div>
+    <div class="skeleton-card"><div class="skeleton-shimmer aspect-[4/5] w-full"></div><div class="p-3.5 space-y-2.5"><div class="flex justify-between"><div class="h-2.5 w-16 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-10 bg-[#F0F0F0] rounded-full"></div></div><div class="h-3.5 w-full bg-[#F0F0F0] rounded-full"></div><div class="h-3.5 w-3/4 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-1/2 bg-[#F0F0F0] rounded-full"></div><div class="flex justify-between items-center pt-1"><div class="h-4 w-20 bg-[#F0F0F0] rounded-full"></div><div class="h-3 w-16 bg-[#F0F0F0] rounded-full"></div></div><div class="grid grid-cols-[1fr_38px] gap-2 pt-2"><div class="h-9 bg-[#F0F0F0] rounded-full"></div><div class="h-9 w-9 bg-[#F0F0F0] rounded-full"></div></div></div></div>
+    <div class="skeleton-card"><div class="skeleton-shimmer aspect-[4/5] w-full"></div><div class="p-3.5 space-y-2.5"><div class="flex justify-between"><div class="h-2.5 w-16 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-10 bg-[#F0F0F0] rounded-full"></div></div><div class="h-3.5 w-full bg-[#F0F0F0] rounded-full"></div><div class="h-3.5 w-3/4 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-1/2 bg-[#F0F0F0] rounded-full"></div><div class="flex justify-between items-center pt-1"><div class="h-4 w-20 bg-[#F0F0F0] rounded-full"></div><div class="h-3 w-16 bg-[#F0F0F0] rounded-full"></div></div><div class="grid grid-cols-[1fr_38px] gap-2 pt-2"><div class="h-9 bg-[#F0F0F0] rounded-full"></div><div class="h-9 w-9 bg-[#F0F0F0] rounded-full"></div></div></div></div>
+    <div class="skeleton-card hidden md:block"><div class="skeleton-shimmer aspect-[4/5] w-full"></div><div class="p-3.5 space-y-2.5"><div class="flex justify-between"><div class="h-2.5 w-16 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-10 bg-[#F0F0F0] rounded-full"></div></div><div class="h-3.5 w-full bg-[#F0F0F0] rounded-full"></div><div class="h-3.5 w-3/4 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-1/2 bg-[#F0F0F0] rounded-full"></div><div class="flex justify-between items-center pt-1"><div class="h-4 w-20 bg-[#F0F0F0] rounded-full"></div><div class="h-3 w-16 bg-[#F0F0F0] rounded-full"></div></div><div class="grid grid-cols-[1fr_38px] gap-2 pt-2"><div class="h-9 bg-[#F0F0F0] rounded-full"></div><div class="h-9 w-9 bg-[#F0F0F0] rounded-full"></div></div></div></div>
+    <div class="skeleton-card hidden md:block"><div class="skeleton-shimmer aspect-[4/5] w-full"></div><div class="p-3.5 space-y-2.5"><div class="flex justify-between"><div class="h-2.5 w-16 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-10 bg-[#F0F0F0] rounded-full"></div></div><div class="h-3.5 w-full bg-[#F0F0F0] rounded-full"></div><div class="h-3.5 w-3/4 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-1/2 bg-[#F0F0F0] rounded-full"></div><div class="flex justify-between items-center pt-1"><div class="h-4 w-20 bg-[#F0F0F0] rounded-full"></div><div class="h-3 w-16 bg-[#F0F0F0] rounded-full"></div></div><div class="grid grid-cols-[1fr_38px] gap-2 pt-2"><div class="h-9 bg-[#F0F0F0] rounded-full"></div><div class="h-9 w-9 bg-[#F0F0F0] rounded-full"></div></div></div></div>
+    <div class="skeleton-card hidden lg:block"><div class="skeleton-shimmer aspect-[4/5] w-full"></div><div class="p-3.5 space-y-2.5"><div class="flex justify-between"><div class="h-2.5 w-16 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-10 bg-[#F0F0F0] rounded-full"></div></div><div class="h-3.5 w-full bg-[#F0F0F0] rounded-full"></div><div class="h-3.5 w-3/4 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-1/2 bg-[#F0F0F0] rounded-full"></div><div class="flex justify-between items-center pt-1"><div class="h-4 w-20 bg-[#F0F0F0] rounded-full"></div><div class="h-3 w-16 bg-[#F0F0F0] rounded-full"></div></div><div class="grid grid-cols-[1fr_38px] gap-2 pt-2"><div class="h-9 bg-[#F0F0F0] rounded-full"></div><div class="h-9 w-9 bg-[#F0F0F0] rounded-full"></div></div></div></div>
+    <div class="skeleton-card hidden lg:block"><div class="skeleton-shimmer aspect-[4/5] w-full"></div><div class="p-3.5 space-y-2.5"><div class="flex justify-between"><div class="h-2.5 w-16 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-10 bg-[#F0F0F0] rounded-full"></div></div><div class="h-3.5 w-full bg-[#F0F0F0] rounded-full"></div><div class="h-3.5 w-3/4 bg-[#F0F0F0] rounded-full"></div><div class="h-2.5 w-1/2 bg-[#F0F0F0] rounded-full"></div><div class="flex justify-between items-center pt-1"><div class="h-4 w-20 bg-[#F0F0F0] rounded-full"></div><div class="h-3 w-16 bg-[#F0F0F0] rounded-full"></div></div><div class="grid grid-cols-[1fr_38px] gap-2 pt-2"><div class="h-9 bg-[#F0F0F0] rounded-full"></div><div class="h-9 w-9 bg-[#F0F0F0] rounded-full"></div></div></div></div>
+  </div>
+  <div id="noProductsSection" class="hidden relative border border-black/10 rounded-[20px] bg-white flex flex-col items-center justify-center text-center overflow-hidden px-4 mt-4" style="padding-top:clamp(48px,12vw,112px); padding-bottom:clamp(48px,12vw,112px); min-height:clamp(320px,55vw,460px);">
+    <div class="relative z-10 flex flex-col items-center">
+      <div class="rounded-full bg-[#FFF0F6] flex items-center justify-center mb-3 md:mb-4" style="width:clamp(56px,12vw,80px); height:clamp(56px,12vw,80px);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF8EBA" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>
+      <h2 class="font-black relative z-10" style="font-size:clamp(16px,4vw,20px);">No products yet</h2>
+      <p class="text-black/55 relative z-10 mt-2 px-2" style="font-size:clamp(11px,2.8vw,13.5px); max-width:clamp(260px,80vw,360px);">We're in Early Access and building out the catalog.</p>
+      <a href="vendor-auth.html" class="bg-black text-white font-bold rounded-full relative z-10 mt-4 md:mt-5 hover:opacity-90 transition inline-block" style="font-size:clamp(11px,2.8vw,13px); padding:clamp(8px,2vw,12px) clamp(16px,4vw,24px);">Become a Vendor</a>
+    </div>
+  </div>
+</section>
+<div class="bg-black py-3 ticker-viewport">
+  <div id="tickerTrack" class="ticker-track text-white text-[12px] font-bold tracking-wide"></div>
+</div>
+<style>
+  .ticker-viewport { overflow:hidden; }
+  .ticker-track { display:flex; width:max-content; animation:tickerScroll 24s linear infinite; }
+  .ticker-viewport:hover .ticker-track { animation-play-state:paused; }
+  @keyframes tickerScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  .cat-bubble.is-active div { ring:2px solid black; }
+</style>
