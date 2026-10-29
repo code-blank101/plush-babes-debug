@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Store — PLUSH BABES</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{font-family:'Inter',sans-serif;box-sizing:border-box;margin:0;padding:0}
+    .hidden{display:none !important}
+    body{background:#FAFAFA;color:#111}
+    .products-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    @media(max-width:1100px){.products-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:700px){.products-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:380px){.products-grid{grid-template-columns:1fr}}
+    .product-card{background:#FFF;border:1px solid rgba(0,0,0,0.08);border-radius:12px;overflow:hidden;position:relative;display:flex;flex-direction:column;transition:border-color .15s}
+    .product-card:hover{border-color:rgba(0,0,0,0.15)}
+    .product-card-img{aspect-ratio:1/1;background:#F5F5F5;position:relative;overflow:hidden;width:100%}
+    .product-card-img img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;padding:0}
+    .product-card-body{padding:10px 12px 12px}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:#FFF;padding:10px 16px;border-radius:999px;display:flex;gap:8px;align-items:center;font-size:12px;z-index:500;transition:0.2s}
+  </style>
+</head>
+<body>
+  <header style="position:sticky;top:0;z-index:40;background:rgba(255,255,255,0.9);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,0.05);">
+    <div style="max-width:1200px;margin:0 auto;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;">
+      <a href="/" style="display:flex;align-items:center;gap:8px;font-weight:900;font-size:13px;text-decoration:none;color:#000"><span style="width:28px;height:28px;background:#000;color:#FFF;border-radius:50%;display:grid;place-items:center;font-size:11px">PB</span> PLUSH BABES <span style="font-weight:400;color:rgba(0,0,0,0.4);font-size:11px;margin-left:4px">GHANA</span></a>
+      <div style="display:flex;gap:8px">
+        <button id="shareStoreBtn" style="height:36px;padding:0 16px;border-radius:999px;border:1px solid rgba(0,0,0,0.1);font-size:11px;font-weight:700;background:#FFF">Share</button>
+        <a id="editStoreBtn" href="vendor/index.html" style="display:none;height:36px;padding:0 16px;border-radius:999px;background:#000;color:#FFF;font-size:11px;font-weight:700;text-decoration:none;align-items:center;justify-content:center">Edit Store</a>
+      </div>
+    </div>
+  </header>
+  <main id="storeMain" style="max-width:1200px;margin:0 auto;padding:20px 16px">
+    <div id="loadingState" style="background:#FFF;border-radius:20px;border:1px solid rgba(0,0,0,0.05);padding:40px;text-align:center">
+      <div style="font-size:13px;font-weight:700">Loading store...</div>
+    </div>
+    <div id="storeContent" class="hidden"></div>
+    <div id="notFound" class="hidden" style="background:#FFF;border-radius:20px;border:1px solid rgba(0,0,0,0.05);padding:40px;text-align:center">
+      <div style="font-weight:900;font-size:16px">Store not found</div>
+      <div style="font-size:11px;color:rgba(0,0,0,0.5);margin-top:6px">This vendor hasn't set up their storefront yet</div>
+    </div>
+  </main>
+  <div id="toast" class="toast hidden"><span id="toastMsg">Saved</span></div>
+<script>
+const SUPABASE_URL = "https://nkrvaaiasynlsfupdszq.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5rcnZhYWlhc3lubHNmdXBkc3pxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0NjI2MjYsImV4cCI6MjEwMDAzODYyNn0.Ag0mZOMwMtSgbB2zW818X7fD0yOaqufls0ib2nCtlQI";
+const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentVendor=null, currentStorefront=null, currentProducts=[], currentUser=null, followerCount=0, isFollowing=false;
+function $(id){return document.getElementById(id)}
+function showToast(m){$('toastMsg').textContent=m;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),2500)}
+async function init(){
+  try{const {data:{user}}=await supa.auth.getUser();if(user)currentUser=user}catch(e){}
+  const id=new URLSearchParams(window.location.search).get('id');
+  if(!id){$('loadingState').classList.add('hidden');$('notFound').classList.remove('hidden');return}
+  await loadStore(id);
+}
+async function loadStore(id){
+  try{
+    const {data:vendor}=await supa.from('vendor_applications').select('*').eq('id',id).maybeSingle();
+    if(!vendor){$('loadingState').classList.add('hidden');$('notFound').classList.remove('hidden');return}
+    currentVendor=vendor;
+    let sf=null;
+    const {data:approved}=await supa.from('vendor_storefronts').select('*').eq('vendor_application_id',vendor.id).eq('status','approved').maybeSingle();
+    if(approved) sf=approved;
+    if(!sf){const {data:anySf}=await supa.from('vendor_storefronts').select('*').eq('vendor_application_id',vendor.id).order('updated_at',{ascending:false}).limit(1).maybeSingle(); if(anySf) sf=anySf}
+    if(currentUser && currentUser.id===vendor.user_id){
+      try{const {data:pendingEdit}=await supa.from('vendor_edits').select('*').eq('vendor_application_id',vendor.id).eq('edit_type','storefront').eq('status','pending').order('created_at',{ascending:false}).limit(1).maybeSingle(); if(pendingEdit && pendingEdit.changes){sf={...(sf||{}),...pendingEdit.changes,status:'pending'}} }catch(e){}
+    }
+    if(sf) currentStorefront=sf;
+    const {data:byApp}=await supa.from('vendor_products').select('*').eq('vendor_application_id',vendor.id).eq('status','approved').order('created_at',{ascending:false}).limit(60);
+    currentProducts=byApp||[];
+    if(!currentProducts.length){const {data:byUser}=await supa.from('vendor_products').select('*').eq('user_id',vendor.user_id).eq('status','approved').order('created_at',{ascending:false}).limit(60); if(byUser) currentProducts=byUser}
+    try{const {count}=await supa.from('vendor_followers').select('*',{count:'exact',head:true}).eq('vendor_id',vendor.id); if(count!==null) followerCount=count}catch(e){}
+    if(currentUser){try{const {data}=await supa.from('vendor_followers').select('id').eq('vendor_id',vendor.id).eq('follower_id',currentUser.id).maybeSingle(); if(data) isFollowing=true}catch(e){}}
+    if(currentUser && currentUser.id===vendor.user_id) {$('editStoreBtn').style.display='flex'}
+    renderFullStore(vendor,sf||null,currentProducts);
+  }catch(e){console.error(e);$('loadingState').classList.add('hidden');$('notFound').classList.remove('hidden')}
+}
+function renderFullStore(vendor,sf,products){
+  $('loadingState').classList.add('hidden');
+  const sc=$('storeContent'); sc.classList.remove('hidden');
+  const logo = sf?.logo_url ? `<img src="${sf.logo_url}" style="width:100%;height:100%;object-fit:cover">` : `<div style="width:100%;height:100%;background:#111;color:#FFF;display:grid;place-items:center;font-weight:900">${(sf?.display_name||vendor.store_name||'ST').slice(0,2).toUpperCase()}</div>`;
+  const cover = sf?.cover_url ? `<img src="${sf.cover_url}" style="width:100%;height:100%;object-fit:cover">` : `<div style="width:100%;height:100%;background:linear-gradient(135deg,#FF8EBA 0%, #111 100%);display:grid;place-items:center;color:#FFF;font-weight:900;font-size:14px">${sf?.display_name||vendor.store_name||'OFFICIAL STORE'}</div>`;
+  const displayName = sf?.display_name||vendor.store_name||'Store';
+  const tagline = sf?.tagline||vendor.store_category||'';
+  const bio = sf?.bio||vendor.store_description||'';
+  sc.innerHTML = `
+    <div style="background:#FFF;border:1px solid rgba(0,0,0,0.06);border-radius:20px;overflow:hidden">
+      <div style="height:180px;background:#F5F5F5;position:relative;overflow:hidden">${cover}<div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.35), transparent)"></div></div>
+      <div style="padding:0 20px 20px;position:relative">
+        <div style="width:80px;height:80px;border-radius:50%;border:4px solid #FFF;background:#F5F5F5;overflow:hidden;margin-top:-40px;box-shadow:0 8px 24px rgba(0,0,0,0.12)">${logo}</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-top:12px;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <div style="display:flex;align-items:center;gap:8px"><div style="font-weight:900;font-size:18px">${displayName}</div><span style="font-size:9px;background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;padding:3px 8px;border-radius:20px;font-weight:800">VERIFIED</span>${sf?.status==='pending'?'<span style="font-size:9px;background:#FFFBEB;border:1px solid #FDE68A;padding:3px 8px;border-radius:20px;font-weight:700">PENDING APPROVAL</span>':''}</div>
+            <div style="font-size:11px;color:#888;margin-top:3px">${vendor.city||''} • ${tagline||vendor.store_category||''}</div>
+            <div style="font-size:11px;color:#666;margin-top:6px">${vendor.city||''}, ${vendor.region||''} ${followerCount?`• ${followerCount} followers`:''} • ${products.length} products</div>
+            <div style="font-size:11px;color:#444;margin-top:8px;background:#FAFAFA;padding:8px 10px;border-radius:8px;white-space:pre-wrap">${bio||'We sell premium essentials'}</div>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              ${vendor.momo_number?`<a href="https://wa.me/${vendor.momo_number?.replace(/\D/g,'')}" target="_blank" style="font-size:11px;background:#25D366;color:#FFF;padding:6px 12px;border-radius:20px;text-decoration:none;font-weight:700">WhatsApp</a>`:''}
+              ${sf?.instagram_url?`<a href="${sf.instagram_url}" target="_blank" style="font-size:11px;border:1px solid #EEE;padding:6px 12px;border-radius:20px;text-decoration:none;color:#000;font-weight:600">IG</a>`:''}
+              ${sf?.website_url?`<a href="${sf.website_url}" target="_blank" style="font-size:11px;border:1px solid #EEE;padding:6px 12px;border-radius:20px;text-decoration:none;color:#000">Website</a>`:''}
+            </div>
+          </div>
+          <button id="followBtnReal" onclick="handleFollow()" style="height:36px;padding:0 18px;border-radius:999px;border:${isFollowing?'1px solid #EEE':'none'};background:${isFollowing?'#FFF':'#000'};color:${isFollowing?'#000':'#FFF'};font-size:11px;font-weight:700;cursor:pointer">${isFollowing?'Following':'Follow'}</button>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;background:#FFF;border:1px solid rgba(0,0,0,0.06);border-radius:999px;padding:6px;width:fit-content">
+      <button id="tabProductsBtn" class="tab-btn active" style="padding:8px 14px;border-radius:999px;border:none;background:#000;color:#FFF;font-size:11px;font-weight:700;cursor:pointer">Products (${products.length})</button>
+      <button id="tabReviewsBtn" class="tab-btn" style="padding:8px 14px;border-radius:999px;border:none;background:#FFF;color:#000;font-size:11px;font-weight:700;cursor:pointer">Reviews</button>
+      <button id="tabAboutBtn" class="tab-btn" style="padding:8px 14px;border-radius:999px;border:none;background:#FFF;color:#000;font-size:11px;font-weight:700;cursor:pointer">About</button>
+    </div>
+    <div id="storeProducts" class="products-grid" style="margin-top:12px">${products.map(p=>`
+      <div class="product-card"><div class="product-card-img">${(p.images&&p.images[0])?`<img src="${p.images[0]}">`:'<div style="width:100%;height:100%;display:grid;place-items:center;color:#999">No image</div>'}</div><div class="product-card-body"><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:700">${p.category||''}</div><div style="font-size:12px;font-weight:700;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.title||''}</div><div style="font-size:12px;font-weight:800;margin-top:2px">GHS ${p.price||0}</div><div style="font-size:10px;color:#999;margin-top:2px">${p.views_count||0} views</div></div></div>
+    `).join('') || '<div style="grid-column:1/-1;padding:40px;text-align:center;color:#999">No products yet</div>'}</div>
+    <div id="storeReviews" class="hidden" style="margin-top:12px;background:#FFF;border:1px solid rgba(0,0,0,0.06);border-radius:16px;padding:16px"><div style="font-size:12px;font-weight:800">Reviews • view-only on storefront</div><div id="reviewsList" style="margin-top:12px"><div style="color:#999;font-size:11px">Loading reviews...</div></div></div>
+    <div id="storeAbout" class="hidden" style="margin-top:12px;background:#FFF;border:1px solid rgba(0,0,0,0.06);border-radius:16px;padding:16px"><div style="font-size:12px;font-weight:800">About ${displayName}</div><div style="font-size:11px;color:#444;margin-top:8px;white-space:pre-wrap">${bio||''}</div><div style="margin-top:12px;font-size:11px"><div><b>Location:</b> ${vendor.city||''}, ${vendor.region||''}</div><div style="margin-top:4px"><b>Category:</b> ${vendor.store_category||''}</div><div style="margin-top:4px"><b>Joined:</b> ${new Date(vendor.created_at).toLocaleDateString()}</div></div></div>
+  `;
+  $('tabProductsBtn')?.addEventListener('click', ()=> switchStoreTab('products'));
+  $('tabReviewsBtn')?.addEventListener('click', ()=> { switchStoreTab('reviews'); loadReviewsInner(vendor); });
+  $('tabAboutBtn')?.addEventListener('click', ()=> switchStoreTab('about'));
+}
+function switchStoreTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>{ b.style.background='#FFF'; b.style.color='#000'; });
+  $('storeProducts').classList.add('hidden');
+  $('storeReviews').classList.add('hidden');
+  $('storeAbout').classList.add('hidden');
+  if(tab==='products'){ $('storeProducts').classList.remove('hidden'); $('tabProductsBtn').style.background='#000'; $('tabProductsBtn').style.color='#FFF'; }
+  if(tab==='reviews'){ $('storeReviews').classList.remove('hidden'); $('tabReviewsBtn').style.background='#000'; $('tabReviewsBtn').style.color='#FFF'; }
+  if(tab==='about'){ $('storeAbout').classList.remove('hidden'); $('tabAboutBtn').style.background='#000'; $('tabAboutBtn').style.color='#FFF'; }
+}
+async function loadReviewsInner(vendor){
+  const el=$('reviewsList'); if(!el) return;
+  el.innerHTML='<div style="color:#999;font-size:11px">Loading reviews...</div>';
+  try{
+    const {data:productIds}=await supa.from('vendor_products').select('id').eq('vendor_application_id',vendor.id);
+    const ids=(productIds||[]).map(p=>p.id);
+    if(!ids.length){ el.innerHTML='<div style="padding:24px;text-align:center;color:#999;font-size:11px">No reviews yet — view-only mode</div>'; return; }
+    const {data, error}=await supa.from('product_reviews').select('*, vendor_products(title)').in('product_id', ids).order('created_at',{ascending:false}).limit(100);
+    if(error) throw error;
+    if(!data||!data.length){ el.innerHTML='<div style="padding:24px;text-align:center;color:#999;font-size:11px">No reviews yet — view-only mode</div>'; return; }
+    // fetch replies for view-only
+    let repliesMap={};
+    try{
+      const rIds=data.map(r=>r.id);
+      const {data:replies}=await supa.from('product_review_replies').select('*').in('review_id', rIds).order('created_at',{ascending:true});
+      if(replies){ replies.forEach(rp=>{ if(!repliesMap[rp.review_id]) repliesMap[rp.review_id]=[]; repliesMap[rp.review_id].push(rp); }); }
+    }catch{}
+    el.innerHTML = `
+      <div style="font-size:11px;color:#666;margin-bottom:12px;background:#FFFBEB;border:1px solid #FDE68A;padding:8px 10px;border-radius:8px">🔒 Storefront is <b>view-only</b>. Users cannot like or reply here. Go to marketplace product page to interact. ${data.length} reviews.</div>
+      <div style="display:flex;flex-direction:column;gap:0">
+      ${data.map(r=>{
+        const replies=repliesMap[r.id]||[];
+        return `
+        <div style="display:flex;gap:10px;padding:14px 0;border-bottom:1px solid #F5F5F5">
+          <div style="width:36px;height:36px;border-radius:50%;background:#111;color:#FFF;display:grid;place-items:center;font-weight:800;font-size:11px;flex-shrink:0">${(r.user_name||r.user_id||'U').slice(0,1).toUpperCase()}</div>
+          <div style="flex:1;min-width:0">
+            <div style="background:#F8F8F8;border-radius:16px;padding:10px 14px">
+              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span style="font-weight:700;font-size:12px">${r.user_name||'User'}</span><span style="font-size:11px">${'⭐'.repeat(r.rating||5)}</span><span style="font-size:10px;color:#888">${new Date(r.created_at).toLocaleDateString()}</span>${r.is_edited?'<span style="font-size:9px;background:#FFF7ED;border:1px solid #FDE68A;padding:2px 6px;border-radius:10px">edited</span>':''}</div>
+              <div style="font-size:12px;margin-top:5px;line-height:1.5;color:#222;white-space:pre-wrap">${r.comment||'Great product!'} ${r.is_edited?`<span style="font-size:9px;color:#999">(edited ${r.edited_at?new Date(r.edited_at).toLocaleDateString():''})</span>`:''}</div>
+              ${r.vendor_products?`<div style="margin-top:6px;font-size:10px;color:#888">Reviewed: <b style="color:#000">${r.vendor_products.title||''}</b></div>`:''}
+            </div>
+            ${replies.length?`<div style="margin-top:8px;padding-left:14px">${replies.map(rp=>`<div style="display:flex;gap:8px;margin-top:8px"><div style="width:24px;height:24px;border-radius:50%;background:#EEE;display:grid;place-items:center;font-size:10px;font-weight:700;flex-shrink:0">${(rp.user_name||'A').slice(0,1).toUpperCase()}</div><div style="background:#FFF;border:1px solid #EEE;border-radius:12px;padding:8px 12px;flex:1"><div style="font-size:11px;font-weight:700">${rp.user_name||'Vendor'} <span style="font-size:9px;background:#000;color:#FFF;padding:2px 6px;border-radius:10px;margin-left:6px">reply</span></div><div style="font-size:11px;margin-top:3px">${rp.comment}</div><div style="font-size:9px;color:#999;margin-top:4px">${new Date(rp.created_at).toLocaleDateString()}</div></div></div>`).join('')}</div>`:''}
+            <div style="font-size:10px;color:#999;margin-top:6px;padding-left:14px">Likes: ${r.likes_count||0} • ${replies.length} replies • view-only</div>
+          </div>
+        </div>`;
+      }).join('')}
+      </div>
+    `;
+  }catch(e){ el.innerHTML=`<div style="padding:24px;text-align:center;color:#999;font-size:11px">No reviews yet</div>`; console.error(e); }
+}
+async function handleFollow(){
+  if(!currentUser){showToast('Login to follow');return}
+  try{
+    if(isFollowing){await supa.from('vendor_followers').delete().eq('vendor_id',currentVendor.id).eq('follower_id',currentUser.id);isFollowing=false;followerCount=Math.max(0,followerCount-1)}
+    else{await supa.from('vendor_followers').insert({vendor_id:currentVendor.id,follower_id:currentUser.id});isFollowing=true;followerCount++}
+    const btn=document.getElementById('followBtnReal'); if(btn){btn.textContent=isFollowing?'Following':'Follow';btn.style.background=isFollowing?'#FFF':'#000';btn.style.color=isFollowing?'#000':'#FFF';btn.style.border=isFollowing?'1px solid #EEE':'none'}
+    showToast(isFollowing?'Following ✓':'Unfollowed');
+  }catch(e){showToast('Follow error: '+e.message.slice(0,50))}
+}
+document.getElementById('shareStoreBtn')?.addEventListener('click',async()=>{const url=window.location.href;try{await navigator.clipboard.writeText(url);showToast('Link copied ✓')}catch(e){showToast(url)}});
+init();
+</script>
+</body>
+</html>

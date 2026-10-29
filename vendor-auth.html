@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PLUSH BABES — Vendor Onboarding</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="marketplace-auth.css" />
+  <style>
+    .vendor-steps{ display:flex; gap:8px; margin:16px 0; }
+    .vendor-step{ flex:1; height:4px; background:#E5E5E5; border-radius:10px; transition:.3s; }
+    .vendor-step.is-active{ background:#000; }
+    .vendor-step.is-done{ background:#FF8EBA; }
+    .upload-box{ border:1.5px dashed #000; border-radius:12px; padding:18px; text-align:center; cursor:pointer; background:#FFF; position:relative; overflow:hidden; min-height:120px; display:flex; flex-direction:column; align-items:center; justify-content:center; transition: all .2s; }
+    .upload-box:hover{ background:#FFFBFD; border-color:#FF8EBA; }
+    .upload-box.has-image{ border-style:solid; border-color:#000; background:#F9F9F9; padding:0; }
+    .upload-box.has-image .upload-placeholder{ display:none !important; }
+    .upload-box input{ position:absolute; inset:0; opacity:0; cursor:pointer; z-index:2; }
+    .upload-preview{ width:100%; height:160px; object-fit:cover; border-radius:10px; display:none; }
+    .upload-preview.is-show{ display:block; }
+    .upload-placeholder{ display:flex; flex-direction:column; align-items:center; gap:6px; font-size:12px; font-weight:600; color:#000; }
+    .upload-placeholder small{ font-weight:400; font-size:10px; color:rgba(0,0,0,0.45); }
+    .upload-box.has-image::after{ content:'Tap to change'; position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.7); color:#fff; font-size:9px; font-weight:700; padding:4px 8px; border-radius:20px; z-index:3; pointer-events:none; }
+    .region-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .ghana-badge{ background:#FF8EBA; color:#000; font-size:10px; font-weight:800; padding:3px 8px; border-radius:20px; display:inline-flex; align-items:center; gap:4px; }
+    .optional-tag{ background:#F3F4F6; color:#6B7280; font-size:9px; font-weight:700; padding:2px 6px; border-radius:10px; margin-left:6px; letter-spacing:0.05em; }
+  </style>
+</head>
+<body>
+<div class="auth-wrapper">
+  <div class="auth-left">
+    <video autoplay muted loop playsinline class="bg-video"><source src="vendor-vid.mp4" type="video/mp4" /></video>
+    <div class="video-overlay"></div>
+    <div class="auth-left-content">
+      <div class="brand">PLUSH BABES - Vendor</div>
+      <div>
+        <h1>Sell to 2,400+ shoppers.<br/>Get paid via MoMo.</h1>
+        <p>We verify every vendor with Ghana Card. Submit, we review in 24h, you start selling.</p>
+      </div>
+    </div>
+  </div>
+  <div class="auth-right">
+    <!-- LOGIN -->
+    <div class="auth-card" id="v-login-page">
+      <h2>Vendor login</h2>
+      <p class="auth-sub">Login to your vendor dashboard</p>
+      <div class="form-group"><label class="label">Email</label><input id="vl-email" class="input" placeholder="store@email.com" /></div>
+      <div class="form-group"><label class="label">Password</label><div class="password-wrap"><input id="vl-password" class="input" type="password" placeholder="••••••••" /><button type="button" class="eye-btn" data-target="vl-password"><i data-lucide="eye"></i></button></div></div>
+      <button id="v-login-btn" class="btn-black full">Login to dashboard</button>
+      <div class="auth-switch">New vendor? <button class="link-btn" id="to-v-signup">Apply to sell</button></div>
+      <div style="margin-top:12px; text-align:center;"><a href="marketplace-auth.html" class="link-btn" style="font-size:11px;">← Back to marketplace</a></div>
+      <div id="vl-error" class="error hidden"></div>
+    </div>
+    <!-- ONBOARDING WIZARD -->
+    <div class="auth-card hidden" id="v-signup-page" style="max-width:520px;">
+      <h2>Apply to sell</h2>
+      <p class="auth-sub">We’ll review your Ghana Card + store info in 24h</p>
+      <div class="vendor-steps">
+        <div class="vendor-step is-active" id="step-ind-1"></div>
+        <div class="vendor-step" id="step-ind-2"></div>
+        <div class="vendor-step" id="step-ind-3"></div>
+        <div class="vendor-step" id="step-ind-4"></div>
+      </div>
+      <!-- STEP 1: Owner -->
+      <div id="v-step-1">
+        <p style="font-weight:700; font-size:13px; margin-bottom:10px;">1. Owner details</p>
+        <div class="form-group"><label class="label">Owner full name (as on Ghana Card)</label><input id="vo-name" class="input" placeholder="Hillary Taylor" /></div>
+        <div class="form-row">
+          <div class="form-group"><label class="label">Email</label><input id="vo-email" class="input" type="email" placeholder="store@email.com" /></div>
+          <div class="form-group"><label class="label">Phone (MoMo)</label><input id="vo-phone" class="input" placeholder="+233 24 000 0000" /></div>
+        </div>
+        <div class="form-group"><label class="label">Ghana Card number (GHA-...)</label><input id="vo-ghana-id" class="input" placeholder="GHA-000000000-0" /></div>
+        <div class="form-row">
+          <div class="form-group"><label class="label">Password</label><div class="password-wrap"><input id="vo-password" class="input" type="password" placeholder="••••••••" /><button type="button" class="eye-btn" data-target="vo-password"><i data-lucide="eye"></i></button></div></div>
+          <div class="form-group"><label class="label">Confirm password</label><div class="password-wrap"><input id="vo-confirm" class="input" type="password" placeholder="••••••••" /><button type="button" class="eye-btn" data-target="vo-confirm"><i data-lucide="eye"></i></button></div></div>
+        </div>
+        <button class="btn-black full" id="to-step-2">Continue → Store info</button>
+        <div class="auth-switch">Already applied? <button class="link-btn" id="to-v-login-1">Login</button></div>
+      </div>
+      <!-- STEP 2: Store -->
+      <div id="v-step-2" class="hidden">
+        <p style="font-weight:700; font-size:13px; margin-bottom:10px;">2. Store details</p>
+        <div class="form-group"><label class="label">Store name</label><input id="vs-name" class="input" placeholder="Plush Hair Studio" /></div>
+        <div class="form-row">
+          <div class="form-group"><label class="label">Category</label>
+            <select id="vs-category" class="input">
+              <option value="">Select</option>
+              <option>Women clothing</option><option>Beauty</option><option>Shoes</option><option>Bags & Luggage</option><option>Jewelry & Accessories</option><option>Wigs & Hair</option><option>Thrift</option><option>Tailor / Seamstress</option><option>Others</option>
+            </select>
+            <div id="vs-category-other-wrap" class="hidden">
+              <input id="vs-category-other" class="input" placeholder="Specify category (e.g. Vintage, Bridal, etc.)" />
+            </div>
+          </div>
+          <div class="form-group"><label class="label">MoMo number for payouts</label><input id="vs-momo" class="input" placeholder="024 000 0000" /></div>
+        </div>
+        <div class="form-group"><label class="label">Store description (what you sell)</label><textarea id="vs-desc" class="input" style="height:70px; resize:none;" placeholder="We sell virgin wigs, frontal lace, etc. Located in Accra..."></textarea></div>
+        <div class="region-grid">
+          <div class="form-group"><label class="label">Region</label>
+            <select id="vs-region" class="input">
+              <option value="">Select region</option>
+              <option selected>Greater Accra</option><option>Ashanti</option><option>Western</option><option>Central</option><option>Eastern</option><option>Northern</option><option>Volta</option><option>Upper East</option><option>Upper West</option><option>Bono</option><option>Savannah</option><option>Oti</option><option>Western North</option><option>Ahafo</option><option>Bono East</option><option>North East</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="label">City / Town</label><input id="vs-city" class="input" placeholder="Accra" value="Accra" /></div>
+        </div>
+        <div class="form-group"><label class="label">Full address / Landmark</label><input id="vs-address" class="input" placeholder="Circle, near Tip Toe Lane, Shop #12" /></div>
+        <div class="form-group"><label class="label">GPS / Google Maps link (optional)</label>
+          <div style="display:flex; gap:8px;"><input id="vs-gps" class="input" placeholder="https://maps.google.com/..." style="flex:1;" /><button type="button" id="vs-pin-btn" class="btn-black" style="white-space:nowrap; padding:0 12px; border-radius:8px;">📍 Pin my location</button></div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:12px;"><button class="btn-white full" id="back-to-1">Back</button><button class="btn-black full" id="to-step-3">Continue → KYC</button></div>
+      </div>
+      <!-- STEP 3: KYC Upload - FIXED -->
+      <div id="v-step-3" class="hidden">
+        <p style="font-weight:700; font-size:13px; margin-bottom:10px;">3. Ghana Card verification</p>
+        <p class="auth-sub" style="margin-bottom:14px;">Upload clear photos. Front + Back required. Selfie optional.</p>
+        
+        <div class="form-group">
+          <label class="label">Ghana Card — Front <span style="color:red;">*</span></label>
+          <div class="upload-box" id="box-front">
+            <div class="upload-placeholder">
+              <i data-lucide="upload" style="width:20px; height:20px;"></i>
+              <span>Click to upload front</span>
+              <small>Clear, no blur</small>
+            </div>
+            <input type="file" id="vu-front" accept="image/*" />
+            <img id="vu-front-preview" class="upload-preview" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="label">Ghana Card — Back <span style="color:red;">*</span></label>
+          <div class="upload-box" id="box-back">
+            <div class="upload-placeholder">
+              <i data-lucide="upload" style="width:20px; height:20px;"></i>
+              <span>Click to upload back</span>
+              <small>Clear, no blur</small>
+            </div>
+            <input type="file" id="vu-back" accept="image/*" />
+            <img id="vu-back-preview" class="upload-preview" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="label">Selfie holding Ghana Card <span class="optional-tag">OPTIONAL</span></label>
+          <div class="upload-box" id="box-selfie">
+            <div class="upload-placeholder">
+              <i data-lucide="camera" style="width:20px; height:20px;"></i>
+              <span>Selfie with card (optional)</span>
+              <small>Skip if you don't have now</small>
+            </div>
+            <input type="file" id="vu-selfie" accept="image/*" />
+            <img id="vu-selfie-preview" class="upload-preview" />
+          </div>
+        </div>
+        <!-- REMOVED: Business certificate / Shop photo - no longer needed -->
+        <div style="display:flex; gap:8px; margin-top:16px;"><button class="btn-white full" id="back-to-2">Back</button><button class="btn-black full" id="to-step-4">Review →</button></div>
+      </div>
+      <!-- STEP 4: Review -->
+      <div id="v-step-4" class="hidden">
+        <p style="font-weight:700; font-size:13px; margin-bottom:10px;">4. Review & submit</p>
+        <div id="v-review-box" style="background:#F8F8F8; border-radius:12px; padding:12px; font-size:12px; line-height:1.6; border:1px solid #EEE;"></div>
+        <div style="margin-top:12px; display:flex; gap:8px; align-items:flex-start;">
+          <input type="checkbox" id="v-terms" style="margin-top:4px;" />
+          <label for="v-terms" style="font-size:11px; color:rgba(0,0,0,0.6);">I confirm my Ghana Card is valid, store location is correct, and I agree to Plush Babes vendor terms. I understand fake ID = ban.</label>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:12px;"><button class="btn-white full" id="back-to-3">Back</button><button class="btn-black full" id="v-submit-btn">Submit for review →</button></div>
+      </div>
+      <div id="vs-error" class="error hidden" style="margin-top:12px;"></div>
+    </div>
+    <!-- PENDING -->
+    <div class="auth-card hidden" id="v-pending-page">
+      <h2>Application under review...</h2>
+      <p class="auth-sub">We received your store + Ghana Card. Admin will approve in 24h.</p>
+      <div id="v-pending-details" style="background:#FFF0F6; border-radius:12px; padding:14px; margin:14px 0; font-size:12px;"></div>
+      <p style="font-size:11px; color:rgba(0,0,0,0.5);">You’ll get SMS + email when approved. If rejected, you can re-apply with clearer docs.</p>
+      <button class="btn-black full" style="margin-top:14px;" onclick="window.location.href='index.html'">Back to marketplace</button>
+      <button class="link-btn" id="v-logout-pending" style="margin-top:10px;">Logout</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">Saved</div>
+<script>
+// FIXED UPLOAD LOGIC - handles text hiding + preview
+(function(){
+  function setupUpload(inputId, previewId, boxId){
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+    const box = document.getElementById(boxId);
+    if(!input || !preview || !box) return;
+    input.addEventListener('change', (e)=>{
+      const file = e.target.files[0];
+      if(!file){
+        preview.classList.remove('is-show');
+        preview.src = '';
+        box.classList.remove('has-image');
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      preview.src = url;
+      preview.classList.add('is-show');
+      box.classList.add('has-image');
+      if(window.lucide) window.lucide.createIcons();
+    });
+  }
+  setupUpload('vu-front','vu-front-preview','box-front');
+  setupUpload('vu-back','vu-back-preview','box-back');
+  setupUpload('vu-selfie','vu-selfie-preview','box-selfie');
+  
+  // Eye toggle now handled in vendor-auth.js - bulletproof delegated version
+})();
+// Simplified validation - selfie optional, no shop cert
+document.getElementById('to-step-4')?.addEventListener('click', ()=>{
+  const front = document.getElementById('vu-front').files[0];
+  const back = document.getElementById('vu-back').files[0];
+  const err = document.getElementById('vs-error');
+  if(!front || !back){
+    if(err){
+      err.textContent = 'Please upload Ghana Card front & back (selfie is optional).';
+      err.classList.remove('hidden');
+    }
+    return;
+  }
+  if(err) err.classList.add('hidden');
+  // Continue to step 4
+  document.getElementById('v-step-3')?.classList.add('hidden');
+  document.getElementById('v-step-4')?.classList.remove('hidden');
+  document.getElementById('step-ind-3')?.classList.add('is-done');
+  document.getElementById('step-ind-4')?.classList.add('is-active');
+  
+  // Build review
+  const name = document.getElementById('vo-name')?.value || '';
+  const store = document.getElementById('vs-name')?.value || '';
+  const region = document.getElementById('vs-region')?.value || 'Greater Accra';
+  const city = document.getElementById('vs-city')?.value || 'Accra';
+  const box = document.getElementById('v-review-box');
+  if(box){
+    box.innerHTML = `
+      <b>${store}</b> • ${region}, ${city}<br/>
+      Owner: ${name}<br/>
+      Ghana Card: Front ✓ Back ✓ ${document.getElementById('vu-selfie').files[0] ? 'Selfie ✓' : 'Selfie (optional skipped)'}<br/>
+      <span style="color:#16a34a; font-weight:700;">Ready to submit — selfie optional, no shop cert needed</span>
+    `;
+  }
+});
+</script>
+<script src="vendor-auth.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</body>
+</html>

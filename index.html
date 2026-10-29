@@ -1,133 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
-<title>PLUSH BABES — where the girlies shop</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<link rel="stylesheet" href="components/header.css">
-<style>
-  html { scroll-behavior: smooth; }
-  body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; overflow-x:hidden; background:#FFFBFD; margin:0; padding:0; }
-  .font-tagline { font-family:'Indie Flower',cursive; }
-  .cat-scroll::-webkit-scrollbar { display:none; } .cat-scroll{-ms-overflow-style:none;scrollbar-width:none;}
-  #siteHeader { 
-    --bg-opacity:1; 
-    background-color:rgba(255,142,186,var(--bg-opacity,1)) !important; 
-    position:fixed !important; 
-    top:0; left:0; right:0; 
-    width:100%; 
-    z-index:1000;
-  }
-  #siteHeader.is-scrolled { 
-    box-shadow:0 4px 20px rgba(0,0,0,0.08); 
-    backdrop-filter:blur(12px); 
-    -webkit-backdrop-filter:blur(12px);
-  }
-  #plush-header { 
-    height:124px; 
-    background:#FF8EBA; 
-    width:100%; 
-  }
-  body.header-collapsed #plush-header { height:68px; }
-  #heroBanner { 
-    margin-top:0 !important; 
-    margin-bottom:0 !important;
-    background:#FF8EBA;
-    width:100%;
-  }
-  .ticker-viewport { overflow:hidden; background:black; }
-  .ticker-track { display:flex; width:max-content; animation:tickerScroll 24s linear infinite; }
-  .ticker-viewport:hover .ticker-track { animation-play-state:paused; }
-  @keyframes tickerScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
-  @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-  .skeleton-shimmer { position: relative; overflow: hidden; background: #F0F0F0; }
-  .skeleton-shimmer::after { content: ""; position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); animation: shimmer 1.5s infinite; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PLUSH BABES - Vendor</title>
+  <link rel="stylesheet" href="vendor.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
-<body class="bg-[#FFFBFD]">
-<!-- HEADER MOUNT -->
-<div id="plush-header"></div>
-<div id="plush-search"></div>
-<div id="plush-mobile-search"></div>
-<!-- Full page skeleton - covers whole index.html until JS loads -->
-<div id="plush-initial-skeleton" class="fixed inset-0 bg-[#FFFBFD] z-[9999] overflow-y-auto">
-  <div class="w-full h-[124px] bg-[#FF8EBA] animate-pulse"></div>
-  <div class="w-full bg-[#FF8EBA] py-6">
-    <div class="max-w-[1280px] mx-auto px-4 grid grid-cols-1 md:grid-cols-[1.1fr_1.9fr] gap-4">
-      <div class="space-y-3"><div class="h-3 w-20 bg-white/30 rounded-full"></div><div class="h-8 w-48 bg-white/40 rounded"></div><div class="h-9 w-24 bg-white rounded-full mt-4"></div></div>
-      <div class="hidden md:grid grid-cols-3 gap-3"><div class="aspect-[3/4] bg-white/20 rounded-[12px] skeleton-shimmer"></div><div class="aspect-[3/4] bg-white/20 rounded-[12px] skeleton-shimmer"></div><div class="aspect-[3/4] bg-white/20 rounded-[12px] skeleton-shimmer"></div></div>
-      <div class="grid md:hidden grid-cols-2 gap-2"><div class="aspect-[3/4] bg-white/20 rounded-[12px] skeleton-shimmer"></div><div class="aspect-[3/4] bg-white/20 rounded-[12px] skeleton-shimmer"></div></div>
+<body>
+  <header class="vendor-header">
+    <div class="header-logo">
+      <span>PLUSH BABES</span>
+      <span style="font-weight:400; color: rgba(0,0,0,0.4); font-size: 11px; margin-left: 6px;">VENDOR</span>
+      <span id="store-status-badge" style="margin-left:10px; font-size:9px; font-weight:800; padding:3px 8px; border-radius:20px; background:#FFF7ED; border:1px solid #FED7AA; display:none;">PENDING</span>
     </div>
-  </div>
-  <div class="w-[98%] md:w-[92%] mx-auto mt-4 bg-white rounded-[20px] p-6">
-    <div class="h-3 w-48 bg-[#F0F0F0] rounded-full mx-auto mb-6"></div>
-    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-6">
-      <div class="flex flex-col items-center gap-2"><div class="w-20 h-20 rounded-full bg-[#F0F0F0] skeleton-shimmer"></div><div class="h-2 w-12 bg-[#F0F0F0] rounded"></div></div>
-      <div class="flex flex-col items-center gap-2"><div class="w-20 h-20 rounded-full bg-[#F0F0F0] skeleton-shimmer"></div><div class="h-2 w-12 bg-[#F0F0F0] rounded"></div></div>
-      <div class="flex flex-col items-center gap-2"><div class="w-20 h-20 rounded-full bg-[#F0F0F0] skeleton-shimmer"></div><div class="h-2 w-12 bg-[#F0F0F0] rounded"></div></div>
-      <div class="flex flex-col items-center gap-2"><div class="w-20 h-20 rounded-full bg-[#F0F0F0] skeleton-shimmer"></div><div class="h-2 w-12 bg-[#F0F0F0] rounded"></div></div>
-      <div class="flex flex-col items-center gap-2"><div class="w-20 h-20 rounded-full bg-[#F0F0F0] skeleton-shimmer"></div><div class="h-2 w-12 bg-[#F0F0F0] rounded"></div></div>
-      <div class="flex flex-col items-center gap-2"><div class="w-20 h-20 rounded-full bg-[#F0F0F0] skeleton-shimmer"></div><div class="h-2 w-12 bg-[#F0F0F0] rounded"></div></div>
-      <div class="flex flex-col items-center gap-2"><div class="w-20 h-20 rounded-full bg-[#F0F0F0] skeleton-shimmer"></div><div class="h-2 w-12 bg-[#F0F0F0] rounded"></div></div>
-      <div class="flex flex-col items-center gap-2"><div class="w-20 h-20 rounded-full bg-[#F0F0F0] skeleton-shimmer"></div><div class="h-2 w-12 bg-[#F0F0F0] rounded"></div></div>
-    </div>
-  </div>
-  <div class="max-w-[1280px] mx-auto px-4 py-10">
-    <div class="h-3 w-20 bg-[#F0F0F0] rounded-full mx-auto mb-6"></div>
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <div class="border border-black/5 rounded-[18px] overflow-hidden bg-white"><div class="aspect-[4/5] bg-[#F0F0F0] skeleton-shimmer"></div><div class="p-3 space-y-2"><div class="h-3 w-full bg-[#F0F0F0] rounded"></div><div class="h-3 w-3/4 bg-[#F0F0F0] rounded"></div></div></div>
-      <div class="border border-black/5 rounded-[18px] overflow-hidden bg-white"><div class="aspect-[4/5] bg-[#F0F0F0] skeleton-shimmer"></div><div class="p-3 space-y-2"><div class="h-3 w-full bg-[#F0F0F0] rounded"></div><div class="h-3 w-3/4 bg-[#F0F0F0] rounded"></div></div></div>
-      <div class="border border-black/5 rounded-[18px] overflow-hidden bg-white"><div class="aspect-[4/5] bg-[#F0F0F0] skeleton-shimmer"></div><div class="p-3 space-y-2"><div class="h-3 w-full bg-[#F0F0F0] rounded"></div><div class="h-3 w-3/4 bg-[#F0F0F0] rounded"></div></div></div>
-      <div class="border border-black/5 rounded-[18px] overflow-hidden bg-white"><div class="aspect-[4/5] bg-[#F0F0F0] skeleton-shimmer"></div><div class="p-3 space-y-2"><div class="h-3 w-full bg-[#F0F0F0] rounded"></div><div class="h-3 w-3/4 bg-[#F0F0F0] rounded"></div></div></div>
-    </div>
-  </div>
-</div>
-<!-- BANNER -->
-<section id="heroBanner" class="w-full bg-[#FF8EBA] relative">
-  <div class="max-w-[1280px] mx-auto px-4 md:px-6 py-5 md:py-7 grid grid-cols-1 md:grid-cols-[1.1fr_1.9fr] gap-4 md:gap-6 items-center">
-    <div class="text-white">
-      <p class="text-[11px] md:text-[12px] font-medium tracking-wide opacity-90">#PlushBabesSale</p>
-      <h1 class="font-black text-[24px] md:text-[36px] leading-[0.9] mt-1.5 uppercase tracking-tight">
-        Save Big On<br>Women's Top Sellers
-      </h1>
-      <div class="mt-4 md:mt-6">
-        <button disabled class="h-9 md:h-10 px-5 md:px-6 rounded-[9px] bg-white text-[#FF4D9A] text-[11px] md:text-[12px] font-black tracking-wide cursor-default">
-          SAVE NOW
+    <div class="header-actions" style="position:relative;">
+      <div style="position:relative;">
+        <button class="notif-btn" id="notif-btn" title="Notifications" style="position:relative;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 6 5 6 10H0c0-5 6-3 6-10"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          <span class="notif-badge" id="notif-count" style="display:none;">0</span>
         </button>
+        <div class="notif-dropdown" id="notif-dropdown" style="display:none;">
+          <div style="padding:12px 14px; border-bottom:1px solid #EEE; display:flex; justify-content:space-between; align-items:center; background:#FFF;">
+            <b style="font-size:13px;">Notifications</b>
+            <button id="notif-mark-read" style="font-size:10px; background:none; border:none; color:#FF8EBA; font-weight:700; cursor:pointer;">Mark all read</button>
+          </div>
+          <div id="notif-list" style="overflow:auto; flex:1; max-height:360px; background:#FFF;"></div>
+        </div>
       </div>
+      <a id="view-storefront-btn" href="storefront.html" target="_blank" class="btn-white" style="font-size:11px; padding:8px 12px; text-decoration:none; display:none;"><i data-lucide="store" style="width:12px; height:12px;"></i> View storefront</a>
+      <button class="btn-black" id="header-add-product-btn"><i data-lucide="plus" style="width:12px; height:12px;"></i> Add Product</button>
+      <button class="btn-white mobile-menu-btn" id="mobile-menu-btn"><i data-lucide="menu"></i></button>
     </div>
-    <div>
-      <div class="hidden md:grid grid-cols-3 gap-3">
-        <img src="public/images/Kelphy.jpeg" alt="" class="w-full aspect-[3/4] object-cover rounded-[12px] border-[3px] border-white shadow-[0_8px_24px_rgba(0,0,0,0.15)]" />
-        <img src="public/images/Kelphy-3.jpeg" alt="" class="w-full aspect-[3/4] object-cover rounded-[12px] border-[3px] border-white shadow-[0_8px_24px_rgba(0,0,0,0.15)]" />
-        <img src="public/images/Kelphy-2.jpeg" alt="" class="w-full aspect-[3/4] object-cover rounded-[12px] border-[3px] border-white shadow-[0_8px_24px_rgba(0,0,0,0.15)]" />
+  </header>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <nav class="sidebar-nav">
+      <button class="nav-btn active" id="nav-dashboard" data-page="dashboard"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+      <button class="nav-btn" id="nav-products" data-page="products"><i data-lucide="package"></i> My Products <span class="nav-badge" id="products-count-badge">0</span></button>
+      <button class="nav-btn" id="nav-orders" data-page="orders"><i data-lucide="shopping-bag"></i> Orders</button>
+      <button class="nav-btn" id="nav-payments" data-page="payments"><i data-lucide="credit-card"></i> Payments</button>
+      <button class="nav-btn" id="nav-settings" data-page="settings"><i data-lucide="settings"></i> Shop Settings</button>
+      <button class="nav-btn" id="nav-storefront" data-page="storefront"><i data-lucide="store"></i> My Storefront <span class="nav-badge" style="background:#FF8EBA; color:#FFF;">NEW</span></button>
+    </nav>
+    <div class="sidebar-footer">
+      <div id="vendor-mini-profile" style="padding:12px; background:#F8F8F8; border-radius:10px; margin-bottom:10px; font-size:11px; display:none;"></div>
+      <button class="nav-btn" id="nav-help"><i data-lucide="help-circle"></i> Help</button>
+      <button class="nav-btn" id="nav-logout"><i data-lucide="log-out"></i> Logout</button>
+    </div>
+  </aside>
+  <main class="main-content">
+    <div id="status-banner-area"></div>
+    <section class="page" id="page-dashboard">
+      <div class="page-header"><div><h1 class="page-title" id="dashboard-welcome">Welcome back</h1><p class="page-subtitle" id="dashboard-subtitle">Early Access Vendor — Track sales</p></div></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600; margin-bottom:6px;">Total Sales</div><div style="font-size:20px; font-weight:700;" id="stat-sales">GHS 0.00</div></div>
+        <div class="stat-card"><div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600; margin-bottom:6px;">Total Views</div><div style="font-size:20px; font-weight:700;" id="stat-pending-orders">0</div></div>
+        <div class="stat-card"><div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600; margin-bottom:6px;">Products</div><div style="font-size:20px; font-weight:700;" id="stat-products">0</div></div>
+        <div class="stat-card"><div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600; margin-bottom:6px;">Low Stock</div><div style="font-size:20px; font-weight:700;" id="stat-low-stock">0</div></div>
       </div>
-      <div class="grid md:hidden grid-cols-2 gap-2.5">
-        <img src="public/images/Kelphy.jpeg" alt="" class="w-full aspect-[3/4] object-cover rounded-[12px] border-2 border-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]" />
-        <img src="public/images/Kelphy-3.jpeg" alt="" class="w-full aspect-[3/4] object-cover rounded-[12px] border-2 border-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]" />
+      <div id="dashboard-recent-orders"></div>
+    </section>
+    <section class="page hidden" id="page-products">
+      <div class="page-header">
+        <div><h1 class="page-title">My Products</h1><p class="page-subtitle" id="products-subtitle">Manage catalog</p></div>
+        <button class="btn-black" id="add-product-btn-2"><i data-lucide="plus" style="width:12px; height:12px;"></i> Add Product</button>
+      </div>
+      <div class="products-toolbar" id="products-toolbar">
+        <div class="products-toolbar-left">
+          <input class="search-input" id="products-search" placeholder="Search products..." />
+          <select class="sort-select" id="products-sort">
+            <option value="newest">Newest</option><option value="oldest">Oldest</option><option value="price-low">Price: Low to High</option><option value="price-high">Price: High to Low</option><option value="stock-low">Stock: Low first</option><option value="status">Status: Draft first</option>
+          </select>
+        </div>
+        <div style="font-size:11px; color:var(--text-muted);" id="products-count">0 products</div>
+      </div>
+      <div class="empty-state" id="products-empty">
+        <div class="empty-icon"><i data-lucide="package"></i></div>
+        <div class="empty-title">No products yet</div>
+        <div class="empty-text" id="products-empty-text">Add your first product</div>
+        <button class="btn-black" id="add-first-product-btn"><i data-lucide="plus" style="width:12px; height:12px;"></i> Add First Product</button>
+      </div>
+      <div class="products-grid hidden" id="products-grid"></div>
+    </section>
+    <section class="page hidden" id="page-orders">
+      <div class="page-header"><div><h1 class="page-title">Orders</h1><p class="page-subtitle">Track customer orders</p></div></div>
+      <div class="empty-state" id="orders-empty"><div class="empty-icon"><i data-lucide="inbox"></i></div><div class="empty-title">No orders yet</div></div>
+      <div class="table-wrap hidden" id="orders-table"><table><thead><tr><th>Order ID</th><th>Product</th><th>Customer</th><th>Variant / Stock</th><th>Groupay</th><th>Status</th></tr></thead><tbody id="orders-tbody"></tbody></table></div>
+    </section>
+    <section class="page hidden" id="page-payments">
+      <div class="page-header"><div><h1 class="page-title">Payments</h1><p class="page-subtitle">Earnings & MoMo payouts</p></div><button class="btn-black" id="request-payout-btn" disabled>Request Payout</button></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600; margin-bottom:6px;">Available</div><div style="font-size:18px; font-weight:700;" id="balance-available">GHS 0.00</div></div>
+        <div class="stat-card"><div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600; margin-bottom:6px;">Pending</div><div style="font-size:18px; font-weight:700;" id="balance-pending">GHS 0.00</div></div>
+        <div class="stat-card"><div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600; margin-bottom:6px;">Total Earned</div><div style="font-size:18px; font-weight:700;" id="balance-total">GHS 0.00</div></div>
+        <div class="stat-card"><div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:600; margin-bottom:6px;">Payout Method</div><div style="font-size:13px; font-weight:600;" id="payout-momo-display">Not set</div></div>
+      </div>
+      <div class="table-wrap" id="payouts-table-wrap"><table><thead><tr><th>ID</th><th>Amount</th><th>MoMo</th><th>Status</th><th>Date</th></tr></thead><tbody id="payouts-tbody"></tbody></table></div>
+      <div class="empty-state hidden" id="payouts-empty"><div class="empty-icon"><i data-lucide="credit-card"></i></div><div class="empty-title">No payouts yet</div></div>
+    </section>
+    <section class="page hidden" id="page-settings">
+      <div class="page-header"><div><h1 class="page-title">Shop Settings</h1><p class="page-subtitle">Shop info, MoMo, materials</p></div><button class="btn-black" id="save-shop-btn">Save changes → Review</button></div>
+      <div class="table-wrap" style="padding:16px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group"><label class="form-label">Shop Name</label><input class="form-input" id="setting-shop-name" /></div>
+          <div class="form-group"><label class="form-label">WhatsApp</label><input class="form-input" id="setting-whatsapp" /></div>
+          <div class="form-group"><label class="form-label">MoMo Number</label><input class="form-input" id="setting-momo" /></div>
+          <div class="form-group"><label class="form-label">Region</label><input class="form-input" id="setting-region" /></div>
+          <div class="form-group"><label class="form-label">City</label><input class="form-input" id="setting-city" /></div>
+          <div class="form-group"><label class="form-label">Address</label><input class="form-input" id="setting-address" /></div>
+        </div>
+        <div class="form-group" style="margin-top:12px;"><label class="form-label">Bio</label><textarea class="form-input" id="setting-bio"></textarea></div>
+        <div id="materials-library" style="margin-top:12px;"></div>
+        <div id="category-requests-list" style="margin-top:12px;"></div>
+        <div id="edit-history" style="margin-top:12px;"></div>
+        <div id="ghana-card-info" style="margin-top:12px; font-size:11px;"></div>
+        <div id="pending-edit-banner" class="hidden" style="margin-top:12px; background:#FFF7ED; border:1px solid #FED7AA; padding:10px; border-radius:8px; font-size:11px;">Edit pending admin review</div>
+      </div>
+    </section>
+    <section class="page hidden" id="page-storefront">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">My Storefront</h1>
+          <p class="page-subtitle">Customize how shoppers see your store</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <a id="storefront-view-live" href="storefront.html" target="_blank" class="btn-white" style="font-size:11px; padding:8px 14px; text-decoration:none;"><i data-lucide="external-link" style="width:12px; height:12px;"></i> View Live</a>
+          <button class="btn-black" id="save-storefront-btn"><i data-lucide="save" style="width:12px; height:12px;"></i> Save Storefront</button>
+        </div>
+      </div>
+      <div class="storefront-editor-grid">
+        <!-- EDITOR -->
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <!-- Logo + Cover -->
+          <div class="table-wrap" style="padding:16px;">
+            <h3 style="font-size:12px; font-weight:800; margin-bottom:12px; display:flex; align-items:center; gap:6px;"><i data-lucide="image" style="width:14px;"></i> Brand Identity</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="form-group">
+                <label class="form-label">Logo / PFP (round)</label>
+                <div id="logo-preview" style="width:80px; height:80px; border-radius:50%; background:#F5F5F5; border:2px dashed #DDD; overflow:hidden; display:grid; place-items:center; margin-bottom:8px; position:relative;">
+                  <span style="font-size:10px; color:#999;">No logo</span>
+                  <img id="logo-preview-img" style="width:100%; height:100%; object-fit:cover; display:none;" />
+                </div>
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <label class="btn-white" style="font-size:11px; cursor:pointer; display:inline-flex; padding:6px 12px;"><input type="file" id="store-logo-input" accept="image/*" style="display:none;" />Choose File</label>
+                  <button type="button" id="delete-logo-btn" class="btn-white" style="font-size:11px; padding:6px 10px; color:#DC2626; display:none;">✕ Delete</button>
+                </div>
+                <div style="font-size:9px; color:#888; margin-top:4px;">500x500 recommended</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Cover Image</label>
+                <div id="cover-preview" style="width:100%; height:80px; border-radius:10px; background:#F5F5F5; border:2px dashed #DDD; overflow:hidden; display:grid; place-items:center; margin-bottom:8px; position:relative;">
+                  <span style="font-size:10px; color:#999;">No cover</span>
+                  <img id="cover-preview-img" style="width:100%; height:100%; object-fit:cover; display:none;" />
+                </div>
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <label class="btn-white" style="font-size:11px; cursor:pointer; display:inline-flex; padding:6px 12px;"><input type="file" id="store-cover-input" accept="image/*" style="display:none;" />Choose File</label>
+                  <button type="button" id="delete-cover-btn" class="btn-white" style="font-size:11px; padding:6px 10px; color:#DC2626; display:none;">✕ Delete</button>
+                </div>
+                <div style="font-size:9px; color:#888; margin-top:4px;">1200x400 recommended</div>
+              </div>
+            </div>
+          </div>
+          <!-- Info -->
+          <div class="table-wrap" style="padding:16px;">
+            <h3 style="font-size:12px; font-weight:800; margin-bottom:12px;">Store Info</h3>
+            <div class="form-group" style="margin-bottom:10px;"><label class="form-label">Display Name</label><input class="form-input" id="sf-display-name" placeholder="My Plush Store" /></div>
+            <div class="form-group" style="margin-bottom:10px;"><label class="form-label">Tagline (short)</label><input class="form-input" id="sf-tagline" placeholder="Luxury bags • Accra" maxlength="60" /></div>
+            <div class="form-group"><label class="form-label">Bio / About</label><textarea class="form-input form-textarea" id="sf-bio" placeholder="Tell shoppers about your store..." style="min-height:80px;"></textarea></div>
+          </div>
+          <!-- Links -->
+          <div class="table-wrap" style="padding:16px;">
+            <h3 style="font-size:12px; font-weight:800; margin-bottom:12px; display:flex; align-items:center; gap:6px;"><i data-lucide="link" style="width:14px;"></i> Social Links</h3>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div class="form-group"><label class="form-label">Instagram</label><input class="form-input" id="sf-instagram" placeholder="https://instagram.com/yourstore" /></div>
+              <div class="form-group"><label class="form-label">TikTok</label><input class="form-input" id="sf-tiktok" placeholder="https://tiktok.com/@yourstore" /></div>
+              <div class="form-group"><label class="form-label">Website</label><input class="form-input" id="sf-website" placeholder="https://yourstore.com" /></div>
+              <div class="form-group"><label class="form-label">WhatsApp (for contact)</label><input class="form-input" id="sf-whatsapp" placeholder="024..." /></div>
+            </div>
+          </div>
+          <!-- Settings -->
+          <div class="table-wrap" style="padding:16px;">
+            <h3 style="font-size:12px; font-weight:800; margin-bottom:12px;">Visibility & Badges</h3>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <label style="display:flex; justify-content:space-between; align-items:center; font-size:11px; background:#FAFAFA; padding:8px 10px; border-radius:8px;"><span><b>Show follower count</b><br><span style="font-size:10px; color:#888;">Let shoppers see how many follow you</span></span><input type="checkbox" id="sf-show-followers" checked /></label>
+              <label style="display:flex; justify-content:space-between; align-items:center; font-size:11px; background:#FAFAFA; padding:8px 10px; border-radius:8px;"><span><b>Show store rating</b><br><span style="font-size:10px; color:#888;">Average from all product reviews</span></span><input type="checkbox" id="sf-show-rating" checked /></label>
+              <label style="display:flex; justify-content:space-between; align-items:center; font-size:11px; background:#FAFAFA; padding:8px 10px; border-radius:8px;"><span><b>Show total sales</b></span><input type="checkbox" id="sf-show-sales" /></label>
+              <label style="display:flex; justify-content:space-between; align-items:center; font-size:11px; background:#FAFAFA; padding:8px 10px; border-radius:8px;"><span><b>Allow followers</b><br><span style="font-size:10px; color:#888;">Shoppers can follow your store</span></span><input type="checkbox" id="sf-allow-follow" checked /></label>
+            </div>
+            <div style="margin-top:12px;">
+              <label class="form-label">Custom Badge Text (optional)</label>
+              <input class="form-input" id="sf-custom-badge" placeholder="e.g. Made in Ghana 🇬🇭" />
+              <div style="font-size:9px; color:#888; margin-top:4px;">Auto badges: Verified, Top Rated, Fast Delivery are added based on performance</div>
+            </div>
+          </div>
+          <div style="background:#FFF7ED; border:1px solid #FED7AA; padding:10px; border-radius:10px; font-size:11px;">
+            <b>How follower count works:</b> Shoppers click Follow on your public storefront. You choose to show/hide count. Followers get notified of new drops (coming soon).
+          </div>
+        </div>
+        <!-- LIVE PREVIEW -->
+        <div style="position:sticky; top:72px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <h3 style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:#888;">Live Preview</h3>
+            
+          </div>
+          <div id="storefront-preview" class="bg-[#FAFAFA]" style="border:1px solid #EDEDED; border-radius:20px; overflow:hidden; min-height:600px; box-shadow:0 12px 32px rgba(0,0,0,0.06); background:#FAFAFA;">
+            <!-- EXACT same code as storefront.html - injected by JS -->
+            <div style="padding:40px; text-align:center; color:#999; font-size:11px;">Loading preview...</div>
+          </div>
+          <div style="margin-top:8px; display:flex; gap:8px;">
+            <button class="btn-white" id="preview-copy-link" style="flex:1; font-size:11px;"><i data-lucide="link" style="width:12px;"></i> Copy Link</button>
+            <button class="btn-black" id="preview-open-live" style="flex:1; font-size:11px;"><i data-lucide="external-link" style="width:12px;"></i> Open Live</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="page hidden" id="page-performance">
+      <div class="perf-header">
+        <button class="btn-white" id="perf-back-btn" style="display:flex; align-items:center; gap:6px; padding:8px 12px;"><i data-lucide="arrow-left" style="width:14px; height:14px;"></i> Back to Products</button>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="live-dot"></span><span style="font-size:10px; font-weight:700; letter-spacing:0.5px;">Live Analytics</span>
+        </div>
+      </div>
+      <div id="perf-product-hero" style="display:flex; gap:14px; background:#FFF; border:1px solid #EDEDED; border-radius:16px; padding:14px; margin-bottom:16px;"></div>
+      <div class="perf-kpis" id="perf-kpis"></div>
+      <div class="perf-charts-grid">
+        <div class="chart-card"><div class="chart-card-header"><h4>Views — Last 30 days</h4><span id="perf-views-trend" class="trend-badge"></span></div><canvas id="perf-views-chart" height="200"></canvas></div>
+        <div class="chart-card"><div class="chart-card-header"><h4>Sales & Revenue — 30 days</h4><span id="perf-sales-trend" class="trend-badge"></span></div><canvas id="perf-sales-chart" height="200"></canvas></div>
+        <div class="chart-card"><div class="chart-card-header"><h4>Saves vs Views</h4></div><canvas id="perf-conversion-chart" height="200"></canvas></div>
+        <div class="chart-card"><div class="chart-card-header"><h4>Stock Health</h4></div><canvas id="perf-stock-chart" height="200"></canvas></div>
+      </div>
+      <div class="perf-insights-grid">
+        <div class="insights-card"><h4>💡 Insights</h4><div id="perf-insights"></div></div>
+        <div class="insights-card"><h4>⭐ Reviews</h4><div id="perf-reviews-list"></div></div>
+        <div class="insights-card"><h4>👁 Views</h4><div id="perf-views-list"></div></div>
+      </div>
+    </section>
+  </main>
+  <div class="modal-overlay" id="product-modal">
+    <div class="modal" style="background:#FFF; border-radius:16px; max-width:900px; width:95%; max-height:90vh; overflow:auto; margin:20px auto;">
+      <div class="modal-header" style="display:flex; justify-content:space-between; padding:16px; border-bottom:1px solid #EEE;">
+        <div><h2 style="font-size:14px; font-weight:700;" id="product-modal-title">Add Product</h2><p id="product-modal-subtitle" style="font-size:11px; color:#888;">Draft allowed while pending</p></div>
+        <button class="btn-white" id="close-modal-btn" style="padding:6px;"><i data-lucide="x" style="width:14px; height:14px;"></i></button>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <form class="modal-form" id="product-form" onsubmit="return false;">
+          <div class="form-group"><label class="form-label"><i data-lucide="image" style="width:12px; height:12px;"></i> Images (fill, no padding)</label><div class="image-slots" id="image-slots" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;"></div></div>
+          <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="product-title" maxlength="60" placeholder="Velvet Crossbody Bag" /></div>
+          <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"><div class="form-group"><label class="form-label">Category</label><select class="form-input" id="product-category"><option>Bags & Luggage</option><option>Beauty Appliances</option><option>Furniture</option><option>Gifts</option><option>Home & Living</option><option>Jewelry</option><option>Kids & Baby</option><option>Kitchen Essentials</option><option>Shoes</option><option>Women Clothing</option><option>Other</option></select></div><div class="form-group hidden" id="category-other-wrap"><label class="form-label">Request New Category</label><input class="form-input" id="category-other-input" placeholder="e.g. Vintage" /><button type="button" class="btn-white" id="submit-category-request" style="margin-top:6px; padding:6px 10px; font-size:10px;">Request</button></div></div>
+          <div class="form-group"><label class="form-label">Description</label><textarea class="form-input form-textarea" id="product-desc" placeholder="Describe material, fit..."></textarea></div>
+          <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"><div class="form-group"><label class="form-label">Price (GHS)</label><input class="form-input" id="product-price" type="number" /></div><div class="form-group"><label class="form-label">Compare Price</label><input class="form-input" id="product-compare-price" type="number" /></div></div>
+          <div class="form-group"><div style="display:flex; justify-content:space-between;"><label class="form-label">Colors / Variants</label><button type="button" class="btn-white" style="padding:5px 8px; font-size:10px;" id="add-color-btn">+ Add</button></div><div id="colors-list" style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"></div></div>
+          <div class="form-group"><label class="form-label">Sizes</label><label style="display:flex; align-items:center; gap:6px; font-size:11px; margin-bottom:6px;"><input type="checkbox" id="no-sizes-check" checked /> No sizes (one size)</label><div id="sizes-wrap" class="hidden" style="display:flex; flex-direction:column; gap:6px;"><div style="display:flex; gap:6px;"><input class="form-input" id="size-input" placeholder="M / 38" style="flex:1;" /><button type="button" class="btn-black" id="add-size-btn" style="padding:8px 12px;">Add</button></div><div id="sizes-pills" style="display:flex; flex-wrap:wrap; gap:4px;"></div></div></div>
+          <div class="form-group"><label class="form-label">Stock per Variant & Size</label><div id="stock-matrix" class="stock-matrix hidden" style="display:grid; gap:6px;"></div><div id="stock-single" class="hidden" style="margin-top:6px;"><label class="form-label">Total Stock</label><input class="form-input" id="stock-single-input" type="number" placeholder="50" /></div></div>
+          <div class="form-group"><label class="form-label">Materials (Enter to add)</label><input class="form-input" id="material-input" placeholder="Faux Leather + Enter" /><div id="materials-pills" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:6px;"></div></div>
+          <div class="form-group"><div style="display:flex; justify-content:space-between;"><label class="form-label">Details (bullet points)</label><button type="button" class="btn-white" style="padding:5px 8px; font-size:10px;" id="add-detail-btn">+ Add</button></div><div id="details-list" style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"></div></div>
+          <div style="background:white; border:1px solid var(--border); border-radius:10px; padding:12px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:12px; font-weight:500;">Enable Groupay</div><div style="font-size:10px; color:var(--text-muted);">Group buying (bulk orders)</div></div><div class="toggle" id="groupay-toggle-wrap" style="width:40px; height:22px; background:#EEE; border-radius:20px; position:relative; cursor:pointer;"><div class="toggle-dot" style="width:18px; height:18px; background:#FFF; border-radius:50%; position:absolute; top:2px; left:2px; transition:0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div></div><input type="checkbox" id="groupay-toggle" class="hidden" /></div>
+          <div style="display:flex; gap:8px; padding-top:12px;"><button type="button" class="btn-white" style="flex:1;" id="cancel-modal-btn">Cancel</button><button type="button" class="btn-white" style="flex:1;" id="save-draft-btn">Save Draft</button><button type="button" class="btn-black" style="flex:1;" id="submit-product-btn">Submit for review</button></div>
+        </form>
       </div>
     </div>
   </div>
-</section>
-<!-- PRODUCT GRID -->
-<div id="plush-product-grid"></div>
-<!-- TICKER -->
-<div class="bg-black py-3 ticker-viewport w-full">
-  <div id="tickerTrack" class="ticker-track text-white text-[12px] font-bold tracking-wide whitespace-nowrap">
-    <span class="px-6 flex items-center gap-6">EARLY ACCESS NOW OPEN <span class="opacity-30">•</span></span>
-    <span class="px-6 flex items-center gap-6">WISHLIST GROUPS <span class="opacity-30">•</span></span>
-    <span class="px-6 flex items-center gap-6">GROUPAY — SPLIT ANY ORDER <span class="opacity-30">•</span></span>
-    <span class="px-6 flex items-center gap-6">PINTEREST TAILORED FEED <span class="opacity-30">•</span></span>
-    <span class="px-6 flex items-center gap-6">FOUNDING VENDOR APPLICATIONS OPEN <span class="opacity-30">•</span></span>
-    <span class="px-6 flex items-center gap-6">🇬🇭 MADE IN GHANA <span class="opacity-30">•</span></span>
-  </div>
-</div>
-<div id="plush-footer"></div>
-<script src="components/loader.js"></script>
-<script src="public/js/script.js"></script>
+  <div class="toast" id="toast" style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#111; color:#FFF; padding:10px 16px; border-radius:999px; display:flex; gap:8px; align-items:center; font-size:12px; z-index:500; opacity:0; pointer-events:none; transition:0.2s;"><i data-lucide="check" style="width:14px; height:14px;"></i><span>Saved</span></div>
+  <script src="vendor.js"></script>
 </body>
 </html>
